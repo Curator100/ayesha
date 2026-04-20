@@ -241,6 +241,9 @@ const ZONES = {
 let selectedUni = '';
 let selectedZones = [];
 
+// Capture referral code from URL ?ref=REF-XXXX
+const REF_CODE = new URLSearchParams(window.location.search).get('ref') || '';
+
 // PWA
 let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', e => {
@@ -301,7 +304,23 @@ async function doSignUp() {
     const {data,error}=await sb.auth.signUp({email,password:pass,options:{data:{name,university:uni,whatsapp:wa}}});
     if (error) { toast('ত্রুটি: '+error.message); return; }
     if (data.user) {
-      await sb.from('profiles').upsert({id:data.user.id,name,university:uni,whatsapp:wa,email,is_new:true});
+      const profileData = {id:data.user.id,name,university:uni,whatsapp:wa,email,is_new:true};
+      if (REF_CODE) profileData.referred_by = REF_CODE;
+      await sb.from('profiles').upsert(profileData);
+
+      // Award coins to referrer
+      if (REF_CODE) {
+        const {data:ref} = await sb.from('referral_codes').select('*').eq('code', REF_CODE).maybeSingle();
+        if (ref) {
+          // Increment uses count
+          await sb.from('referral_codes').update({uses: (ref.uses||0)+1}).eq('id', ref.id);
+          // Award 50 coins to moderator
+          const {data:mod} = await sb.from('profiles').select('coins').eq('id', ref.moderator_id).single();
+          if (mod) await sb.from('profiles').update({coins: (mod.coins||0)+50}).eq('id', ref.moderator_id);
+          toast('রেফারেল বোনাস যোগ হয়েছে! 🪙');
+        }
+      }
+
       saveLocal({id:data.user.id,name,university:uni,whatsapp:wa,email});
       toast('রেজিস্ট্রেশন সফল! ✓');
       showHome(name,true);
