@@ -2,93 +2,95 @@
 <html lang="bn">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
 <title>Jobs – TuitionMedia</title>
 <link rel="manifest" href="manifest.json"/>
 <meta name="theme-color" content="#e0004e"/>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="config.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:Arial,sans-serif;min-height:100vh;background:linear-gradient(135deg,#fff0f3 0%,#ffe0ea 30%,#ffb3c6 60%,#e0004e 100%);padding-bottom:100px}
-.header{background:rgba(255,255,255,0.88);backdrop-filter:blur(16px);padding:16px 20px;border-bottom:1px solid rgba(224,0,78,0.15);display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100}
-.header h1{font-size:20px;font-weight:900;color:#e0004e}
-.content{padding:16px}
-.section-label{font-size:13px;font-weight:800;color:#8b0034;margin:16px 0 10px;padding:6px 12px;background:rgba(224,0,78,0.08);border-radius:8px;display:inline-block}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:Arial,sans-serif;min-height:100vh;background:linear-gradient(160deg,#fff0f3 0%,#ffd6e4 40%,#ffb3c6 70%,#e0004e 100%);background-attachment:fixed;padding-bottom:90px}
+.hdr{background:rgba(255,255,255,0.88);backdrop-filter:blur(16px);padding:15px 18px;border-bottom:1px solid rgba(224,0,78,0.15);position:sticky;top:0;z-index:50}
+.hdr h1{font-size:20px;font-weight:900;color:#e0004e}
+.hdr p{font-size:12px;color:#c4005a;margin-top:2px}
+.content{padding:14px}
+.slabel{font-size:13px;font-weight:800;color:#8b0034;margin:14px 0 10px;padding:6px 12px;background:rgba(224,0,78,0.08);border-radius:8px;display:inline-block}
 
 /* JOB CARD */
-.job-card{background:rgba(255,255,255,0.78);backdrop-filter:blur(12px);border:1.5px solid rgba(224,0,78,0.15);border-radius:18px;padding:18px;margin-bottom:14px;box-shadow:0 4px 16px rgba(224,0,78,0.08);cursor:pointer;transition:transform .2s,box-shadow .2s}
-.job-card:active{transform:scale(0.98)}
-.job-card.fake{border-color:rgba(224,0,78,0.3);background:linear-gradient(135deg,rgba(255,240,243,0.9),rgba(255,255,255,0.9))}
-.job-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
-.job-title{font-size:16px;font-weight:800;color:#8b0034}
-.job-salary{font-size:18px;font-weight:900;color:#e0004e}
-.job-details{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
-.tag{background:rgba(224,0,78,0.08);color:#8b0034;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}
-.apply-btn{width:100%;padding:12px;background:linear-gradient(135deg,#e0004e,#ff3369);color:#fff;border:none;border-radius:12px;font-size:14px;font-family:Arial,sans-serif;font-weight:700;cursor:pointer}
-.new-badge{background:#e0004e;color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700}
+.jcard{background:rgba(255,255,255,0.8);backdrop-filter:blur(12px);border:1.5px solid rgba(224,0,78,0.15);border-radius:18px;padding:17px;margin-bottom:13px;box-shadow:0 4px 14px rgba(224,0,78,0.08)}
+.jcard.fake{border-color:rgba(224,0,78,0.28);background:linear-gradient(135deg,rgba(255,240,243,0.92),rgba(255,255,255,0.92))}
+.jh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px;gap:8px}
+.jtitle{font-size:15px;font-weight:800;color:#8b0034}
+.jsal{font-size:17px;font-weight:900;color:#e0004e;white-space:nowrap}
+.jtags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
+.tag{background:rgba(224,0,78,0.08);color:#8b0034;padding:4px 9px;border-radius:18px;font-size:11px;font-weight:600}
+.nbadge{background:#e0004e;color:#fff;font-size:10px;padding:2px 7px;border-radius:9px;font-weight:700;margin-left:5px}
+.abtn{width:100%;padding:12px;background:linear-gradient(135deg,#e0004e,#ff3369);color:#fff;border:none;border-radius:12px;font-size:14px;font-family:Arial,sans-serif;font-weight:700;cursor:pointer}
+.abtn:active{opacity:.85}
+.empty-box{text-align:center;padding:30px 16px;color:#8b0034;font-size:14px;line-height:1.7;background:rgba(255,255,255,.6);border-radius:16px;border:1.5px dashed rgba(224,0,78,.2)}
 
-/* MODAL */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:1000;align-items:flex-end;justify-content:center}
-.modal-overlay.active{display:flex}
-.modal-sheet{background:linear-gradient(180deg,#fff0f3,#fff);border-radius:24px 24px 0 0;width:100%;max-width:480px;padding:24px 20px 40px;max-height:88vh;overflow-y:auto}
-.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
-.modal-title{font-size:18px;font-weight:800;color:#8b0034}
-.modal-close{width:32px;height:32px;border-radius:50%;background:rgba(224,0,78,0.1);border:none;font-size:18px;cursor:pointer;color:#e0004e}
-.field-group{margin-bottom:16px}
-.field-group label{font-size:12px;font-weight:700;color:#8b0034;margin-bottom:6px;display:block}
-.field-group input, .field-group select{width:100%;padding:12px 16px;border:1.5px solid rgba(224,0,78,0.2);border-radius:12px;font-size:14px;font-family:Arial,sans-serif;background:rgba(255,255,255,0.8);outline:none}
-.btn-primary{width:100%;padding:14px;background:linear-gradient(135deg,#e0004e,#ff3369);color:#fff;border:none;border-radius:14px;font-size:16px;font-family:Arial,sans-serif;font-weight:700;cursor:pointer;margin-top:8px}
-.info-box{background:rgba(224,0,78,0.07);border-left:4px solid #e0004e;border-radius:0 12px 12px 0;padding:14px;margin-bottom:14px;font-size:14px;color:#333;line-height:1.6}
-.charge-box{background:linear-gradient(135deg,rgba(224,0,78,0.05),rgba(255,179,198,0.15));border:1.5px solid rgba(224,0,78,0.2);border-radius:14px;padding:16px;margin-bottom:14px}
+/* OVERLAYS */
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:200;align-items:flex-end;justify-content:center}
+.ov.open{display:flex}
+.sheet{background:linear-gradient(180deg,#fff5f7,#fff);border-radius:24px 24px 0 0;width:100%;max-width:480px;padding:22px 18px 42px;max-height:88vh;overflow-y:auto}
+.sh-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.sh-title{font-size:17px;font-weight:800;color:#8b0034}
+.sh-x{width:32px;height:32px;border-radius:50%;background:rgba(224,0,78,.1);border:none;font-size:17px;cursor:pointer;color:#e0004e;display:flex;align-items:center;justify-content:center}
+.fg{margin-bottom:15px}
+.fg label{font-size:12px;font-weight:700;color:#8b0034;display:block;margin-bottom:5px}
+.fg select,.fg input{width:100%;padding:12px 14px;border:1.5px solid rgba(224,0,78,.2);border-radius:11px;font-size:14px;font-family:Arial,sans-serif;background:rgba(255,255,255,.85);color:#222;outline:none}
+.btn{width:100%;padding:13px;background:linear-gradient(135deg,#e0004e,#ff3369);color:#fff;border:none;border-radius:13px;font-size:15px;font-family:Arial,sans-serif;font-weight:700;cursor:pointer;margin-top:6px}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+.btn2{padding:12px;background:rgba(224,0,78,.1);color:#e0004e;border:1.5px solid rgba(224,0,78,.3);border-radius:12px;font-size:14px;font-family:Arial,sans-serif;font-weight:700;cursor:pointer;width:100%}
+.btn-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.infobox{background:rgba(224,0,78,.07);border-left:4px solid #e0004e;border-radius:0 12px 12px 0;padding:14px;margin-bottom:14px;font-size:14px;color:#333;line-height:1.65}
+.chargebox{background:linear-gradient(135deg,rgba(224,0,78,.05),rgba(255,179,198,.15));border:1.5px solid rgba(224,0,78,.2);border-radius:14px;padding:16px;margin-bottom:14px}
 .charge-title{font-size:16px;font-weight:800;color:#e0004e;margin-bottom:8px}
-.charge-detail{font-size:14px;color:#333;line-height:1.7}
-.btn-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
-.btn-yes{padding:12px;background:linear-gradient(135deg,#e0004e,#ff3369);color:#fff;border:none;border-radius:12px;font-size:14px;font-family:Arial,sans-serif;font-weight:700;cursor:pointer}
-.btn-no{padding:12px;background:rgba(224,0,78,0.1);color:#e0004e;border:1.5px solid rgba(224,0,78,0.3);border-radius:12px;font-size:14px;font-family:Arial,sans-serif;font-weight:700;cursor:pointer}
-.success-box{text-align:center;padding:20px 0}
-.success-icon{font-size:48px;margin-bottom:12px}
-.success-msg{font-size:16px;font-weight:700;color:#8b0034;line-height:1.6}
+.charge-detail{font-size:14px;color:#333;line-height:1.75}
+.success-wrap{text-align:center;padding:20px 0}
+.success-icon{font-size:52px;margin-bottom:12px}
+.success-msg{font-size:15px;font-weight:700;color:#8b0034;line-height:1.65}
 
 /* BOTTOM NAV */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-top:1px solid rgba(224,0,78,0.2);display:flex;justify-content:space-around;padding:10px 0 14px;z-index:500}
-.nav-item{display:flex;flex-direction:column;align-items:center;cursor:pointer;color:#c4005a;font-size:10px;font-weight:600;gap:4px;min-width:60px}
-.nav-item span:first-child{font-size:22px}
-.nav-item.active{color:#e0004e}
+.bnav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.94);backdrop-filter:blur(16px);border-top:1px solid rgba(224,0,78,.18);display:flex;justify-content:space-around;padding:10px 0 16px;z-index:100}
+.ni{display:flex;flex-direction:column;align-items:center;cursor:pointer;color:#c4005a;font-size:10px;font-weight:700;gap:3px;min-width:55px}
+.ni .ic{font-size:22px}
+.ni.on{color:#e0004e}
 
-#toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);background:#333;color:#fff;padding:10px 24px;border-radius:24px;font-size:13px;z-index:9999;transition:transform .3s;pointer-events:none}
-#toast.show{transform:translateX(-50%) translateY(0)}
+#toast{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-14px);background:rgba(28,28,28,.93);color:#fff;padding:10px 22px;border-radius:22px;font-size:13px;z-index:9999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
-<div class="header">
-  <div>
-    <h1>💼 Jobs & টিউশন</h1>
-  </div>
-</div>
+<div class="hdr"><h1>💼 Jobs & টিউশন</h1><p id="zoneInfo">আপনার এলাকার সেরা অফার</p></div>
 <div id="toast"></div>
 
 <div class="content">
+  <!-- FAKE (data-collection) section -->
   <div id="fakeSection">
-    <div class="section-label">🌟 আপনার কাছের টিউশন অফার</div>
+    <div class="slabel">🌟 আপনার বিশ্ববিদ্যালয়ের কাছের অফার</div>
     <div id="fakeJobs"></div>
   </div>
+
+  <!-- REAL section — only after survey done -->
   <div id="realSection" style="display:none">
-    <div class="section-label">📋 আপনার এলাকার টিউশন</div>
+    <div class="slabel">📋 আপনার জোনের টিউশন</div>
     <div id="realJobs"></div>
+  </div>
+
+  <div id="noZoneMsg" style="display:none" class="empty-box">
+    আপনার পছন্দের জোন এখনো সেট করা হয়নি।<br/>
+    Home পেজে গিয়ে প্রোফাইল সম্পূর্ণ করুন।<br/><br/>
+    <strong>সব জোনের টিউশন দেখাচ্ছে:</strong>
   </div>
 </div>
 
-<!-- DATA COLLECTION MODAL (first apply) -->
-<div class="modal-overlay" id="dataModal">
-  <div class="modal-sheet" onclick="event.stopPropagation()">
-    <div class="modal-header">
-      <div class="modal-title">📋 কিছু তথ্য দিন</div>
-      <button class="modal-close" onclick="closeModal('dataModal')">✕</button>
-    </div>
-    <div class="field-group">
+<!-- DATA SURVEY MODAL -->
+<div class="ov" id="surveyOv">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <div class="sh-head"><div class="sh-title">📋 কিছু তথ্য দিন</div><button class="sh-x" onclick="closeOv('surveyOv')">✕</button></div>
+    <div class="fg">
       <label>বর্তমানে আপনি কয়টি টিউশন করান?</label>
-      <select id="tuitionCount">
+      <select id="tuiCount">
         <option value="">বেছে নিন</option>
         <option value="0">কোনোটি না</option>
         <option value="1">১টি</option>
@@ -97,178 +99,243 @@ body{font-family:Arial,sans-serif;min-height:100vh;background:linear-gradient(13
         <option value="4+">৪টির বেশি</option>
       </select>
     </div>
-    <div class="field-group">
-      <label>আপনি কি আগে মিডিয়া ফি দিয়ে মিডিয়া থেকে টিউশন নিয়েছেন?</label>
-      <select id="mediaBefore">
+    <div class="fg">
+      <label>আপনি কি আগে মিডিয়া ফি দিয়ে টিউশন নিয়েছেন?</label>
+      <select id="mediaPaid">
         <option value="">বেছে নিন</option>
         <option value="yes">হ্যাঁ, নিয়েছি</option>
         <option value="no">না, নিইনি</option>
       </select>
     </div>
-    <button class="btn-primary" onclick="submitDataCollection()">পরবর্তী ধাপ →</button>
+    <button class="btn" id="surveyBtn" onclick="submitSurvey()">পরবর্তী ধাপ →</button>
   </div>
 </div>
 
-<!-- SERVICE CHARGE AGREEMENT MODAL -->
-<div class="modal-overlay" id="chargeModal">
-  <div class="modal-sheet" onclick="event.stopPropagation()">
-    <div class="modal-header">
-      <div class="modal-title">💳 সার্ভিস চার্জ</div>
-      <button class="modal-close" onclick="closeModal('chargeModal')">✕</button>
-    </div>
-    <div class="info-box">
-      আমরা আমাদের সার্ভিসটি সুন্দরভাবে পরিচালনা করার জন্য <strong>৫৩.২% সার্ভিস চার্জ</strong> নিয়ে থাকি। তবে সেটি টিউশন/জব কনফার্ম হওয়ার পর প্রদানযোগ্য। আপনি কি এতে রাজি?
-    </div>
+<!-- SERVICE CHARGE MODAL -->
+<div class="ov" id="chargeOv">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <div class="sh-head"><div class="sh-title">💳 সার্ভিস চার্জ</div><button class="sh-x" onclick="closeOv('chargeOv')">✕</button></div>
+    <div class="infobox">আমরা আমাদের সার্ভিসটি সুন্দরভাবে পরিচালনা করার জন্য <strong>৫৩.২% সার্ভিস চার্জ</strong> নিয়ে থাকি। তবে সেটি, টিউশন/জব কনফার্ম হওয়ার পর প্রদানযোগ্য। আপনি কি এতে রাজি?</div>
     <div class="btn-row">
-      <button class="btn-yes" onclick="agreeCharge()">হ্যাঁ, রাজি আছি</button>
-      <button class="btn-no" onclick="closeModal('chargeModal')">না</button>
+      <button class="btn" onclick="agreeCharge()">হ্যাঁ, রাজি আছি</button>
+      <button class="btn2" onclick="closeOv('chargeOv')">না</button>
     </div>
   </div>
 </div>
 
 <!-- PAYMENT BREAKDOWN MODAL -->
-<div class="modal-overlay" id="paymentModal">
-  <div class="modal-sheet" onclick="event.stopPropagation()">
-    <div class="modal-header">
-      <div class="modal-title">💰 পেমেন্ট বিস্তারিত</div>
-      <button class="modal-close" onclick="closeModal('paymentModal')">✕</button>
-    </div>
-    <div class="charge-box">
-      <div class="charge-title" id="chargeTitle">সার্ভিস চার্জ: ০ টাকা</div>
+<div class="ov" id="payOv">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <div class="sh-head"><div class="sh-title">💰 পেমেন্ট বিস্তারিত</div><button class="sh-x" onclick="closeOv('payOv')">✕</button></div>
+    <div class="chargebox">
+      <div class="charge-title" id="chargeTitle">সার্ভিস চার্জ</div>
       <div class="charge-detail" id="chargeDetail"></div>
     </div>
     <div class="btn-row">
-      <button class="btn-yes" onclick="finalApply()">হ্যাঁ, আবেদন করুন</button>
-      <button class="btn-no" onclick="closeModal('paymentModal')">না</button>
+      <button class="btn" onclick="finalApply()">হ্যাঁ, আবেদন করুন</button>
+      <button class="btn2" onclick="closeOv('payOv')">না</button>
     </div>
   </div>
 </div>
 
 <!-- SUCCESS MODAL -->
-<div class="modal-overlay" id="successModal">
-  <div class="modal-sheet" onclick="event.stopPropagation()">
-    <div class="modal-header">
-      <div class="modal-title">আবেদন সম্পন্ন</div>
-      <button class="modal-close" onclick="closeModal('successModal')">✕</button>
-    </div>
-    <div class="success-box">
+<div class="ov" id="successOv">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <div class="sh-head"><div class="sh-title">আবেদন সম্পন্ন</div><button class="sh-x" onclick="closeOv('successOv')">✕</button></div>
+    <div class="success-wrap">
       <div class="success-icon">✅</div>
       <div class="success-msg">আপনার আবেদনটি গ্রহণ করা হয়েছে।<br/>আপনার সাথে যোগাযোগ করা হবে।</div>
     </div>
   </div>
 </div>
 
-<div class="bottom-nav">
-  <div class="nav-item active" onclick="window.location.href='jobs.html'"><span>💼</span><span>Jobs</span></div>
-  <div class="nav-item" onclick="window.location.href='index.html'"><span>🏠</span><span>Home</span></div>
-  <div class="nav-item" onclick="window.location.href='safety.html'"><span>🛡️</span><span>Safety</span></div>
-  <div class="nav-item" onclick="showTalk()"><span>💬</span><span>Talk to Us</span></div>
+<div class="bnav">
+  <div class="ni on"><span class="ic">💼</span><span>Jobs</span></div>
+  <div class="ni" onclick="go('index.html')"><span class="ic">🏠</span><span>Home</span></div>
+  <div class="ni" onclick="go('safety.html')"><span class="ic">🛡️</span><span>Safety</span></div>
+  <div class="ni" onclick="toast('💬 WhatsApp: +8801846156788')"><span class="ic">💬</span><span>Talk to Us</span></div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-let currentUser = requireAuth();
-let dataCollected = false;
+const SB_URL = 'https://fxkmanginfisqzmjomji.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4a21hbmdpbmZpc3F6bWpvbWppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2NjgwNjUsImV4cCI6MjA5MjI0NDA2NX0.sCS6HrZCPyqFMPLJFSFIQO_aUzp75DWfpg1ElVi2cyc';
+const sb = supabase.createClient(SB_URL, SB_KEY);
+
+// ── AUTH GUARD ─────────────────────────────────────────────
+function getLocal() { try { return JSON.parse(localStorage.getItem('tm_user')||'null'); } catch { return null; } }
+const CU = getLocal();
+if (!CU) { window.location.href = 'index.html'; }
+
+// ── STATE ──────────────────────────────────────────────────
+let surveyDone = false;
 let pendingJob = null;
 
+// Fake tuitions — shown near university, 4k-8k salary, for data collection only
 const FAKE_JOBS = [
-  { id: 'f1', title: 'Class 6-7 টিউশন', location: 'বিশ্ববিদ্যালয়ের কাছে (১.২ কিমি)', salary: 5000, subject: 'সকল বিষয়', days: 'সপ্তাহে ৩ দিন', time: 'বিকাল ৪টা', students: '১ জন', fake: true },
-  { id: 'f2', title: 'Class 9-10 টিউশন', location: 'কাছের এলাকা (০.৮ কিমি)', salary: 6500, subject: 'গণিত ও বিজ্ঞান', days: 'সপ্তাহে ৪ দিন', time: 'সন্ধ্যা ৬টা', students: '১ জন', fake: true },
-  { id: 'f3', title: 'HSC টিউশন', location: 'কাছের এলাকা (১.৫ কিমি)', salary: 7500, subject: 'ইংরেজি ও বাংলা', days: 'সপ্তাহে ৫ দিন', time: 'বিকাল ৩টা', students: '১ জন', fake: true },
-  { id: 'f4', title: 'Class 4-5 টিউশন', location: 'নিকটবর্তী (০.৫ কিমি)', salary: 4000, subject: 'সকল বিষয়', days: 'সপ্তাহে ৩ দিন', time: 'সন্ধ্যা ৫টা', students: '২ জন', fake: true },
-  { id: 'f5', title: 'O-Level গণিত', location: 'কাছের এলাকা (১.৮ কিমি)', salary: 8000, subject: 'Mathematics', days: 'সপ্তাহে ৩ দিন', time: 'বিকাল ৪টা', students: '১ জন', fake: true },
+  { id:'f1', title:'Class 6-7 টিউশন',     location: CU ? CU.university+' এর কাছে (১.২ কিমি)' : 'বিশ্ববিদ্যালয়ের কাছে',  salary:5000, subject:'সকল বিষয়',         days:'সপ্তাহে ৩ দিন', time:'বিকাল ৪টা' },
+  { id:'f2', title:'Class 9-10 টিউশন',    location: CU ? CU.university+' এর কাছে (০.৮ কিমি)' : 'বিশ্ববিদ্যালয়ের কাছে',  salary:6500, subject:'গণিত ও বিজ্ঞান',    days:'সপ্তাহে ৪ দিন', time:'সন্ধ্যা ৬টা' },
+  { id:'f3', title:'HSC বাংলা + ইংরেজি',  location: CU ? CU.university+' এর কাছে (১.৫ কিমি)' : 'বিশ্ববিদ্যালয়ের কাছে',  salary:7500, subject:'ইংরেজি ও বাংলা',   days:'সপ্তাহে ৫ দিন', time:'বিকাল ৩টা'  },
+  { id:'f4', title:'Class 4-5 টিউশন',     location: CU ? CU.university+' এর কাছে (০.৫ কিমি)' : 'বিশ্ববিদ্যালয়ের কাছে',  salary:4000, subject:'সকল বিষয়',         days:'সপ্তাহে ৩ দিন', time:'সন্ধ্যা ৫টা' },
+  { id:'f5', title:'O-Level Mathematics',  location: CU ? CU.university+' এর কাছে (১.৮ কিমি)' : 'বিশ্ববিদ্যালয়ের কাছে',  salary:8000, subject:'Mathematics',      days:'সপ্তাহে ৩ দিন', time:'বিকাল ৪টা'  },
 ];
 
+// ── INIT ───────────────────────────────────────────────────
+async function init() {
+  // Check if survey already done
+  const {data: sv} = await sb.from('user_data_survey').select('user_id').eq('user_id', CU.id).maybeSingle();
+  surveyDone = !!sv;
+
+  if (surveyDone) {
+    // Hide fake section, show real tuitions only
+    document.getElementById('fakeSection').style.display = 'none';
+    loadRealJobs();
+  } else {
+    // Show fake tuitions for data collection
+    renderFakeJobs();
+  }
+}
+
+// ── RENDER FAKE JOBS ───────────────────────────────────────
 function renderFakeJobs() {
   const c = document.getElementById('fakeJobs');
   c.innerHTML = FAKE_JOBS.map(j => `
-    <div class="job-card fake" onclick="applyJob('${j.id}', ${j.salary}, false, \`${j.title}\`)">
-      <div class="job-header">
-        <div class="job-title">${j.title} <span class="new-badge">নতুন</span></div>
-        <div class="job-salary">৳${j.salary.toLocaleString()}/মাস</div>
+    <div class="jcard fake">
+      <div class="jh">
+        <div class="jtitle">${j.title}<span class="nbadge">নতুন</span></div>
+        <div class="jsal">৳${j.salary.toLocaleString()}/মাস</div>
       </div>
-      <div class="job-details">
+      <div class="jtags">
         <span class="tag">📍 ${j.location}</span>
         <span class="tag">📚 ${j.subject}</span>
         <span class="tag">📅 ${j.days}</span>
         <span class="tag">⏰ ${j.time}</span>
       </div>
-      <button class="apply-btn">আবেদন করুন →</button>
+      <button class="abtn" onclick="startApply('${j.id}',${j.salary},false,'${j.title.replace(/'/g,"\\'")}')">আবেদন করুন →</button>
     </div>`).join('');
 }
 
+// ── LOAD REAL JOBS ─────────────────────────────────────────
 async function loadRealJobs() {
-  const user = getUser();
-  const zones = user?.zones || [];
-  let q = supabase.from('tuitions').select('*').eq('visible', true).eq('status', 'available');
-  if (zones.length) q = q.in('zone', zones);
-  const { data } = await q.limit(20);
-  if (!data || !data.length) return;
+  // Get fresh user zones from DB (in case they updated profile)
+  const {data: profile} = await sb.from('profiles').select('zones,university').eq('id', CU.id).single();
+  const zones = profile?.zones || CU.zones || [];
+  const uni   = profile?.university || CU.university || '';
+
+  if (zones.length) {
+    document.getElementById('zoneInfo').textContent = zones.join(', ');
+  } else {
+    document.getElementById('noZoneMsg').style.display = 'block';
+  }
+
+  let q = sb.from('tuitions').select('*').eq('visible', true).eq('status', 'available');
+  if (zones.length > 0) {
+    q = q.in('zone', zones);
+  }
+  const {data, error} = await q.order('created_at', {ascending: false}).limit(30);
+
+  if (error) { toast('টিউশন লোড করতে সমস্যা হয়েছে'); return; }
+
   document.getElementById('realSection').style.display = 'block';
   const c = document.getElementById('realJobs');
+  if (!data || !data.length) {
+    c.innerHTML = '<div class="empty-box">এখনো আপনার জোনে কোনো টিউশন নেই।<br/>শীঘ্রই নতুন অফার আসবে।</div>';
+    return;
+  }
   c.innerHTML = data.map(j => `
-    <div class="job-card" onclick="applyJob('${j.id}', ${j.salary}, true, \`${j.title || 'টিউশন'}\`)">
-      <div class="job-header">
-        <div class="job-title">${j.title || 'টিউশন'}</div>
-        <div class="job-salary">৳${(j.salary||0).toLocaleString()}/মাস</div>
+    <div class="jcard">
+      <div class="jh">
+        <div class="jtitle">${j.title||'টিউশন'}</div>
+        <div class="jsal">৳${(j.salary||0).toLocaleString()}/মাস</div>
       </div>
-      <div class="job-details">
-        <span class="tag">📍 ${j.location || ''}</span>
-        <span class="tag">📚 ${j.subject || ''}</span>
-        <span class="tag">📅 ${j.days || ''}</span>
-        <span class="tag">⏰ ${j.time || ''}</span>
-        <span class="tag">🗓️ ${j.zone || ''}</span>
+      <div class="jtags">
+        ${j.location?`<span class="tag">📍 ${j.location}</span>`:''}
+        ${j.subject?`<span class="tag">📚 ${j.subject}</span>`:''}
+        ${j.days?`<span class="tag">📅 ${j.days}</span>`:''}
+        ${j.time?`<span class="tag">⏰ ${j.time}</span>`:''}
+        ${j.zone?`<span class="tag">🗓️ ${j.zone}</span>`:''}
+        ${j.class?`<span class="tag">🏫 ${j.class}</span>`:''}
       </div>
-      <button class="apply-btn">আবেদন করুন →</button>
+      <button class="abtn" onclick="startApply('${j.id}',${j.salary||0},true,'${(j.title||'টিউশন').replace(/'/g,"\\'")}')">আবেদন করুন →</button>
     </div>`).join('');
 }
 
-function applyJob(id, salary, isReal, title) {
-  pendingJob = { id, salary, isReal, title };
-  const user = getUser();
-  if (!isReal && !dataCollected) {
-    document.getElementById('dataModal').classList.add('active');
+// ── APPLY FLOW ─────────────────────────────────────────────
+function startApply(id, salary, isReal, title) {
+  pendingJob = {id, salary, isReal, title};
+  if (!isReal && !surveyDone) {
+    // Fake job — collect data first
+    openOv('surveyOv');
   } else {
-    document.getElementById('chargeModal').classList.add('active');
+    openOv('chargeOv');
   }
 }
 
-async function submitDataCollection() {
-  const tc = document.getElementById('tuitionCount').value;
-  const mb = document.getElementById('mediaBefore').value;
-  if (!tc || !mb) { showToast('সব তথ্য দিন'); return; }
-  const user = getUser();
-  await supabase.from('user_data_survey').upsert({ user_id: user.id, tuition_count: tc, paid_media_before: mb === 'yes' });
-  dataCollected = true;
-  closeModal('dataModal');
-  document.getElementById('chargeModal').classList.add('active');
+async function submitSurvey() {
+  const tc = document.getElementById('tuiCount').value;
+  const mp = document.getElementById('mediaPaid').value;
+  if (!tc || !mp) { toast('সব তথ্য দিন'); return; }
+  const btn = document.getElementById('surveyBtn');
+  btn.disabled = true; btn.textContent = 'সংরক্ষণ হচ্ছে...';
+  const {error} = await sb.from('user_data_survey').upsert({
+    user_id: CU.id,
+    tuition_count: tc,
+    paid_media_before: mp === 'yes'
+  });
+  btn.disabled = false; btn.textContent = 'পরবর্তী ধাপ →';
+  if (error) { toast('ত্রুটি: '+error.message); return; }
+  surveyDone = true;
+  closeOv('surveyOv');
+  openOv('chargeOv');
 }
 
 function agreeCharge() {
-  closeModal('chargeModal');
+  closeOv('chargeOv');
   const s = pendingJob.salary;
   const total = Math.round(s * 0.532);
   const advance = Math.min(1000, total);
-  const remaining = total - advance;
+  const rest = total - advance;
   document.getElementById('chargeTitle').textContent = `সার্ভিস চার্জ: ৳${total.toLocaleString()} টাকা`;
-  document.getElementById('chargeDetail').innerHTML = `এই টিউশনের সার্ভিস চার্জ <strong>৳${total.toLocaleString()} টাকা</strong>।<br/><br/>তবে <strong>৳${advance.toLocaleString()} টাকা</strong> টিউশন কনফার্ম হওয়ার ১ সপ্তাহের মধ্যে দিতে হবে।<br/><br/>বাকি <strong>৳${remaining.toLocaleString()} টাকা</strong> স্যালারি পাওয়ার পর দিতে পারবেন।<br/><br/>আপনি কি রাজি?`;
-  document.getElementById('paymentModal').classList.add('active');
+  document.getElementById('chargeDetail').innerHTML =
+    `এই টিউশনের সার্ভিস চার্জ <strong>৳${total.toLocaleString()} টাকা</strong>।<br/><br/>` +
+    `<strong>৳${advance.toLocaleString()} টাকা</strong> টিউশন কনফার্ম হওয়ার ১ সপ্তাহের মধ্যে দিতে হবে।<br/><br/>` +
+    `বাকি <strong>৳${rest.toLocaleString()} টাকা</strong> স্যালারি পাওয়ার পর দিতে পারবেন।<br/><br/>আপনি কি রাজি?`;
+  openOv('payOv');
 }
 
 async function finalApply() {
-  const user = getUser();
-  await supabase.from('applications').insert({ user_id: user.id, tuition_id: pendingJob.id, tuition_title: pendingJob.title, salary: pendingJob.salary, is_fake: !pendingJob.isReal, applied_at: new Date().toISOString() });
-  closeModal('paymentModal');
-  document.getElementById('successModal').classList.add('active');
-  if (!pendingJob.isReal) loadRealJobs();
+  const {error} = await sb.from('applications').insert({
+    user_id: CU.id,
+    tuition_id: pendingJob.id,
+    tuition_title: pendingJob.title,
+    salary: pendingJob.salary,
+    is_fake: !pendingJob.isReal,
+    applied_at: new Date().toISOString()
+  });
+  if (error) { toast('আবেদন করতে সমস্যা: '+error.message); return; }
+  closeOv('payOv');
+  openOv('successOv');
+
+  // After first fake job apply + survey, now show real jobs too
+  if (!pendingJob.isReal) {
+    setTimeout(() => {
+      document.getElementById('fakeSection').style.display = 'none';
+      loadRealJobs();
+    }, 2000);
+  }
 }
 
-function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-function showToast(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
-function showTalk() { alert('💬 WhatsApp: +8801846156788'); }
+// ── HELPERS ────────────────────────────────────────────────
+function openOv(id)  { document.getElementById(id).classList.add('open'); }
+function closeOv(id) { document.getElementById(id).classList.remove('open'); }
+function go(url)     { window.location.href = url; }
+function toast(msg)  {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._t); t._t = setTimeout(()=>t.classList.remove('show'), 3200);
+}
 
-renderFakeJobs();
-loadRealJobs();
+init();
 </script>
 </body>
 </html>
