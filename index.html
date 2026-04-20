@@ -2,432 +2,396 @@
 <html lang="bn">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
 <title>TuitionMedia</title>
 <link rel="manifest" href="manifest.json"/>
 <meta name="theme-color" content="#e0004e"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <link rel="apple-touch-icon" href="icons/icon-192.png"/>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="config.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:Arial,sans-serif;min-height:100vh;background:linear-gradient(135deg,#fff0f3 0%,#ffe0ea 30%,#ffb3c6 60%,#e0004e 100%);overflow-x:hidden}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:Arial,sans-serif;min-height:100vh;background:linear-gradient(160deg,#fff0f3 0%,#ffd6e4 40%,#ffb3c6 70%,#e0004e 100%);background-attachment:fixed}
 
-/* INSTALL BANNER */
-#installBanner{position:fixed;bottom:0;left:0;right:0;z-index:9999;background:linear-gradient(135deg,rgba(255,255,255,0.95),rgba(255,224,234,0.95));backdrop-filter:blur(12px);border-top:2px solid rgba(224,0,78,0.3);padding:16px;text-align:center;box-shadow:0 -4px 20px rgba(224,0,78,0.2)}
-#installBanner p{font-size:14px;color:#8b0034;margin-bottom:10px;font-weight:600;line-height:1.5}
-#installBanner button{background:linear-gradient(135deg,#e0004e,#ff3369);color:#fff;border:none;padding:12px 28px;border-radius:25px;font-size:15px;font-family:Arial,sans-serif;font-weight:700;cursor:pointer;box-shadow:0 4px 15px rgba(224,0,78,0.4)}
+/* INSTALL BANNER – at TOP so it NEVER covers buttons */
+#installBanner{
+  position:fixed;top:0;left:0;right:0;z-index:9999;
+  background:rgba(255,255,255,0.97);
+  border-bottom:2px solid rgba(224,0,78,0.35);
+  padding:10px 14px;display:none;
+  align-items:center;gap:10px;flex-wrap:wrap;
+  box-shadow:0 2px 12px rgba(224,0,78,0.18)
+}
+#installBanner p{flex:1;font-size:13px;color:#8b0034;font-weight:600;line-height:1.4;min-width:180px}
+#installBtn{background:linear-gradient(135deg,#e0004e,#ff3369);color:#fff;border:none;
+  padding:9px 18px;border-radius:20px;font-size:13px;font-family:Arial,sans-serif;
+  font-weight:700;cursor:pointer;white-space:nowrap}
+#bannerClose{background:none;border:none;font-size:20px;color:#e0004e;cursor:pointer;padding:4px 8px;line-height:1}
 
-/* GLASS CARD */
-.glass{background:rgba(255,255,255,0.72);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.8);border-radius:20px;box-shadow:0 8px 32px rgba(224,0,78,0.12)}
+/* AUTH */
+#authScreen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px 16px 32px}
+.logo{font-size:30px;font-weight:900;color:#e0004e;margin-bottom:4px}
+.logo-sub{font-size:13px;color:#c4005a;margin-bottom:22px;text-align:center}
+.auth-card{width:100%;max-width:400px;background:rgba(255,255,255,0.84);backdrop-filter:blur(18px);border:1.5px solid rgba(255,255,255,0.9);border-radius:22px;padding:26px 22px;box-shadow:0 8px 32px rgba(224,0,78,0.14)}
+.tabs{display:flex;background:rgba(224,0,78,0.08);border-radius:12px;padding:3px;margin-bottom:22px}
+.tab{flex:1;padding:10px;text-align:center;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;color:#c4005a;transition:all .2s;user-select:none}
+.tab.on{background:linear-gradient(135deg,#e0004e,#ff3369);color:#fff;box-shadow:0 2px 10px rgba(224,0,78,0.3)}
+.fg{margin-bottom:15px;position:relative}
+.fg label{font-size:12px;font-weight:700;color:#8b0034;display:block;margin-bottom:5px}
+.fg input{width:100%;padding:12px 14px;border:1.5px solid rgba(224,0,78,0.22);border-radius:11px;font-size:14px;font-family:Arial,sans-serif;background:rgba(255,255,255,0.85);color:#222;outline:none}
+.fg input:focus{border-color:#e0004e;background:#fff}
+.uni-dd{position:absolute;top:calc(100% + 2px);left:0;right:0;background:#fff;border:1.5px solid rgba(224,0,78,0.3);border-radius:12px;max-height:190px;overflow-y:auto;z-index:200;box-shadow:0 8px 24px rgba(0,0,0,0.13);display:none}
+.uni-opt{padding:10px 14px;font-size:13px;cursor:pointer;color:#333;border-bottom:1px solid #f8eaed}
+.uni-opt:last-child{border-bottom:none}
+.uni-opt:active,.uni-opt:hover{background:#fff0f3;color:#e0004e}
+.btn{width:100%;padding:14px;background:linear-gradient(135deg,#e0004e,#ff3369);color:#fff;border:none;border-radius:13px;font-size:16px;font-family:Arial,sans-serif;font-weight:700;cursor:pointer;margin-top:6px;box-shadow:0 4px 18px rgba(224,0,78,0.32);transition:opacity .15s}
+.btn:active{opacity:.82}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+.switch{text-align:center;margin-top:14px;font-size:13px;color:#8b0034;cursor:pointer;text-decoration:underline}
 
-/* AUTH SCREENS */
-#authScreen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px;padding-bottom:100px}
-.auth-logo{font-size:28px;font-weight:900;color:#e0004e;margin-bottom:6px;letter-spacing:-1px}
-.auth-sub{font-size:13px;color:#c4005a;margin-bottom:24px;text-align:center}
-.auth-card{width:100%;max-width:400px;padding:28px 24px}
-.auth-tabs{display:flex;margin-bottom:24px;background:rgba(224,0,78,0.08);border-radius:12px;padding:3px}
-.auth-tab{flex:1;padding:10px;text-align:center;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;color:#c4005a;transition:all .2s}
-.auth-tab.active{background:linear-gradient(135deg,#e0004e,#ff3369);color:#fff;box-shadow:0 2px 10px rgba(224,0,78,0.3)}
-.field-group{margin-bottom:16px;position:relative}
-.field-group label{font-size:12px;font-weight:700;color:#8b0034;margin-bottom:6px;display:block}
-.field-group input{width:100%;padding:12px 16px;border:1.5px solid rgba(224,0,78,0.2);border-radius:12px;font-size:14px;font-family:Arial,sans-serif;background:rgba(255,255,255,0.8);color:#333;outline:none;transition:border .2s}
-.field-group input:focus{border-color:#e0004e;background:#fff}
-.uni-dropdown{position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid rgba(224,0,78,0.3);border-radius:12px;max-height:200px;overflow-y:auto;z-index:100;box-shadow:0 8px 24px rgba(0,0,0,0.12);margin-top:2px}
-.uni-option{padding:10px 16px;font-size:13px;cursor:pointer;color:#333;border-bottom:1px solid #f5e6ea}
-.uni-option:hover{background:#fff0f3;color:#e0004e}
-.btn-primary{width:100%;padding:14px;background:linear-gradient(135deg,#e0004e,#ff3369);color:#fff;border:none;border-radius:14px;font-size:16px;font-family:Arial,sans-serif;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(224,0,78,0.35);margin-top:8px;transition:transform .1s,box-shadow .2s}
-.btn-primary:active{transform:scale(0.98)}
-.switch-link{text-align:center;margin-top:16px;font-size:13px;color:#8b0034;cursor:pointer}
+/* HOME */
+#homeScreen{display:none;min-height:100vh;padding-bottom:88px}
+.topbar{background:rgba(255,255,255,0.86);backdrop-filter:blur(14px);padding:16px 20px 12px;border-bottom:1px solid rgba(224,0,78,0.14);position:sticky;top:0;z-index:50}
+.uname{font-size:19px;font-weight:800;color:#8b0034}
+.dmsg{font-size:13px;color:#c4005a;margin-top:4px;line-height:1.5}
+.hcontent{padding:18px 16px}
+.sos-wrap{text-align:center;margin:8px 0 6px}
+.sos-btn{width:158px;height:158px;border-radius:50%;background:linear-gradient(145deg,#b80028,#e0004e,#ff3369);color:#fff;border:none;font-size:19px;font-weight:900;font-family:Arial,sans-serif;cursor:pointer;animation:pulse 2s infinite;letter-spacing:1px}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(224,0,78,.5)}70%{box-shadow:0 0 0 22px rgba(224,0,78,0)}100%{box-shadow:0 0 0 0 rgba(224,0,78,0)}}
+.sos-note{font-size:12px;color:#8b0034;margin-top:10px;line-height:1.65;padding:0 8px;text-align:center}
+.boxes{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:18px}
+.box{background:rgba(255,255,255,0.78);backdrop-filter:blur(12px);border:1.5px solid rgba(224,0,78,0.15);border-radius:16px;padding:18px 12px;text-align:center;cursor:pointer;box-shadow:0 4px 14px rgba(224,0,78,0.09);transition:transform .15s}
+.box:active{transform:scale(0.96)}
+.box-icon{font-size:30px;margin-bottom:8px}
+.box-txt{font-size:13px;font-weight:700;color:#8b0034;line-height:1.4}
+.bnav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,0.94);backdrop-filter:blur(16px);border-top:1px solid rgba(224,0,78,0.18);display:flex;justify-content:space-around;padding:10px 0 16px;z-index:100}
+.ni{display:flex;flex-direction:column;align-items:center;cursor:pointer;color:#c4005a;font-size:10px;font-weight:700;gap:3px;min-width:55px}
+.ni .ic{font-size:22px}
+.ni.on{color:#e0004e}
 
-/* HOME SCREEN */
-#homeScreen{display:none;min-height:100vh;padding-bottom:80px}
-.top-bar{background:linear-gradient(135deg,rgba(255,255,255,0.85),rgba(255,224,234,0.85));backdrop-filter:blur(12px);padding:16px 20px 12px;border-bottom:1px solid rgba(224,0,78,0.15)}
-.user-name{font-size:18px;font-weight:800;color:#8b0034}
-.daily-msg{font-size:13px;color:#c4005a;margin-top:4px;line-height:1.5}
-.home-content{padding:20px}
-
-/* SOS BUTTON */
-.sos-wrap{text-align:center;margin:16px 0}
-.sos-btn{width:160px;height:160px;border-radius:50%;background:linear-gradient(135deg,#cc0033,#ff0050,#ff3369);color:#fff;border:none;font-size:18px;font-weight:900;font-family:Arial,sans-serif;cursor:pointer;box-shadow:0 0 0 0 rgba(224,0,78,0.4);animation:sosPulse 2s infinite;letter-spacing:1px}
-@keyframes sosPulse{0%{box-shadow:0 0 0 0 rgba(224,0,78,0.5)}70%{box-shadow:0 0 0 24px rgba(224,0,78,0)}100%{box-shadow:0 0 0 0 rgba(224,0,78,0)}}
-.sos-warning{font-size:12px;color:#8b0034;margin-top:10px;line-height:1.6;text-align:center;padding:0 10px}
-
-/* TWO BOXES */
-.two-boxes{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px}
-.box-card{padding:18px 14px;border-radius:16px;cursor:pointer;text-align:center;transition:transform .2s,box-shadow .2s;background:rgba(255,255,255,0.75);backdrop-filter:blur(12px);border:1.5px solid rgba(224,0,78,0.15);box-shadow:0 4px 16px rgba(224,0,78,0.1)}
-.box-card:active{transform:scale(0.97)}
-.box-icon{font-size:32px;margin-bottom:8px}
-.box-title{font-size:13px;font-weight:700;color:#8b0034;line-height:1.4}
-
-/* BOTTOM NAV */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-top:1px solid rgba(224,0,78,0.2);display:flex;justify-content:space-around;padding:10px 0 14px;z-index:500}
-.nav-item{display:flex;flex-direction:column;align-items:center;cursor:pointer;color:#c4005a;font-size:10px;font-weight:600;gap:4px;min-width:60px}
-.nav-item span:first-child{font-size:22px}
-.nav-item.active{color:#e0004e}
-.nav-item.active span:first-child{filter:drop-shadow(0 0 6px rgba(224,0,78,0.6))}
-
-/* POPUP MODALS */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:flex-end;justify-content:center}
-.modal-overlay.active{display:flex}
-.modal-sheet{background:linear-gradient(180deg,#fff0f3,#fff);border-radius:24px 24px 0 0;width:100%;max-width:480px;max-height:88vh;overflow-y:auto;padding:24px 20px 40px}
-.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-.modal-title{font-size:18px;font-weight:800;color:#8b0034}
-.modal-close{width:32px;height:32px;border-radius:50%;background:rgba(224,0,78,0.1);border:none;font-size:18px;cursor:pointer;color:#e0004e;display:flex;align-items:center;justify-content:center}
-.tip-item{background:rgba(255,255,255,0.8);border-left:4px solid #e0004e;border-radius:0 12px 12px 0;padding:12px 16px;margin-bottom:12px;font-size:14px;color:#333;line-height:1.6}
+/* OVERLAY SHEETS */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.52);z-index:500;align-items:flex-end;justify-content:center}
+.overlay.open{display:flex}
+.sheet{background:linear-gradient(180deg,#fff5f7,#fff);border-radius:24px 24px 0 0;width:100%;max-width:480px;max-height:88vh;overflow-y:auto;padding:22px 18px 44px}
+.sh-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.sh-title{font-size:17px;font-weight:800;color:#8b0034}
+.sh-x{width:32px;height:32px;border-radius:50%;background:rgba(224,0,78,0.1);border:none;font-size:17px;cursor:pointer;color:#e0004e;display:flex;align-items:center;justify-content:center;line-height:1}
+.tip{background:rgba(255,255,255,0.85);border-left:4px solid #e0004e;border-radius:0 11px 11px 0;padding:12px 14px;margin-bottom:11px;font-size:14px;color:#222;line-height:1.65}
 
 /* PROFILE POPUP */
-.profile-popup{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:2000;align-items:center;justify-content:center;padding:20px}
-.profile-popup.active{display:flex}
-.profile-card{background:linear-gradient(145deg,#fff0f3,#fff);border-radius:20px;padding:28px 24px;width:100%;max-width:400px;max-height:90vh;overflow-y:auto}
-.profile-title{font-size:20px;font-weight:900;color:#e0004e;margin-bottom:6px}
-.profile-sub{font-size:13px;color:#8b0034;margin-bottom:20px;line-height:1.5}
-.zone-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
-.zone-chip{padding:8px 10px;border-radius:10px;border:1.5px solid rgba(224,0,78,0.25);font-size:12px;color:#8b0034;cursor:pointer;background:rgba(255,255,255,0.8);text-align:center;transition:all .2s}
-.zone-chip.selected{background:linear-gradient(135deg,#e0004e,#ff3369);color:#fff;border-color:transparent}
+.pp-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:600;align-items:center;justify-content:center;padding:16px}
+.pp-ov.open{display:flex}
+.pp-card{background:linear-gradient(145deg,#fff5f7,#fff);border-radius:20px;padding:26px 20px;width:100%;max-width:400px;max-height:92vh;overflow-y:auto}
+.pp-title{font-size:20px;font-weight:900;color:#e0004e;margin-bottom:5px}
+.pp-sub{font-size:13px;color:#8b0034;margin-bottom:18px;line-height:1.5}
+.zone-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:7px}
+.zc{padding:8px 9px;border-radius:10px;border:1.5px solid rgba(224,0,78,0.22);font-size:11px;color:#8b0034;cursor:pointer;background:rgba(255,255,255,0.85);text-align:center;transition:all .15s;line-height:1.3}
+.zc.on{background:linear-gradient(135deg,#e0004e,#ff3369);color:#fff;border-color:transparent}
 
 /* TOAST */
-#toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);background:#333;color:#fff;padding:10px 24px;border-radius:24px;font-size:13px;z-index:9999;transition:transform .3s;pointer-events:none}
-#toast.show{transform:translateX(-50%) translateY(0)}
+#toast{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-16px);background:rgba(28,28,28,.93);color:#fff;padding:10px 22px;border-radius:22px;font-size:13px;z-index:9998;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
 
-<!-- INSTALL BANNER -->
 <div id="installBanner">
   <p>প্রতিদিন নতুন নতুন জব অথবা টিউশন অফার পেতে আমাদের অ্যাপে ডাউনলোড করুন।</p>
-  <button id="installBtn">📲 ডাউনলোড করুন</button>
+  <button id="installBtn">📲 ডাউনলোড</button>
+  <button id="bannerClose">✕</button>
 </div>
 
-<!-- TOAST -->
 <div id="toast"></div>
 
-<!-- AUTH SCREEN -->
+<!-- AUTH -->
 <div id="authScreen">
-  <div class="auth-logo">📚 TuitionMedia</div>
-  <div class="auth-sub">নিরাপদ টিউশন, নিরাপদ জীবন</div>
-  <div class="auth-card glass">
-    <div class="auth-tabs">
-      <div class="auth-tab active" onclick="switchTab('signin')">সাইন ইন</div>
-      <div class="auth-tab" onclick="switchTab('signup')">রেজিস্ট্রেশন</div>
+  <div class="logo">📚 TuitionMedia</div>
+  <div class="logo-sub">নিরাপদ টিউশন, নিরাপদ জীবন</div>
+  <div class="auth-card">
+    <div class="tabs">
+      <div class="tab on" id="tabSI" onclick="switchTab('si')">সাইন ইন</div>
+      <div class="tab" id="tabSU" onclick="switchTab('su')">রেজিস্ট্রেশন</div>
     </div>
-
-    <!-- SIGN IN -->
-    <div id="signinForm">
-      <div class="field-group">
-        <label>ইমেইল</label>
-        <input type="email" id="siEmail" placeholder="আপনার ইমেইল"/>
-      </div>
-      <div class="field-group">
-        <label>পাসওয়ার্ড</label>
-        <input type="password" id="siPass" placeholder="পাসওয়ার্ড"/>
-      </div>
-      <button class="btn-primary" onclick="signIn()">লগ ইন করুন</button>
-      <div class="switch-link" onclick="switchTab('signup')">নতুন অ্যাকাউন্ট? রেজিস্ট্রেশন করুন →</div>
+    <div id="formSI">
+      <div class="fg"><label>ইমেইল</label><input type="email" id="siEmail" placeholder="আপনার ইমেইল"/></div>
+      <div class="fg"><label>পাসওয়ার্ড</label><input type="password" id="siPass" placeholder="পাসওয়ার্ড"/></div>
+      <button class="btn" id="siBtn" onclick="doSignIn()">লগ ইন করুন</button>
+      <div class="switch" onclick="switchTab('su')">নতুন অ্যাকাউন্ট? রেজিস্ট্রেশন করুন →</div>
     </div>
-
-    <!-- SIGN UP -->
-    <div id="signupForm" style="display:none">
-      <div class="field-group">
-        <label>আপনার নাম</label>
-        <input type="text" id="suName" placeholder="পুরো নাম"/>
-      </div>
-      <div class="field-group">
+    <div id="formSU" style="display:none">
+      <div class="fg"><label>পুরো নাম</label><input type="text" id="suName" placeholder="নাম লিখুন"/></div>
+      <div class="fg">
         <label>বিশ্ববিদ্যালয়</label>
-        <input type="text" id="suUni" placeholder="বিশ্ববিদ্যালয়ের নাম টাইপ করুন" autocomplete="off" oninput="filterUni(this.value)"/>
-        <div class="uni-dropdown" id="uniDropdown" style="display:none"></div>
+        <input type="text" id="suUni" placeholder="বিশ্ববিদ্যালয়ের নাম লিখুন" autocomplete="off" oninput="onUniInput(this.value)"/>
+        <div class="uni-dd" id="uniDD"></div>
       </div>
-      <div class="field-group">
-        <label>WhatsApp নম্বর</label>
-        <input type="tel" id="suWa" placeholder="+880..."/>
-      </div>
-      <div class="field-group">
-        <label>ইমেইল</label>
-        <input type="email" id="suEmail" placeholder="আপনার ইমেইল"/>
-      </div>
-      <div class="field-group">
-        <label>পাসওয়ার্ড</label>
-        <input type="password" id="suPass" placeholder="যেকোনো পাসওয়ার্ড"/>
-      </div>
-      <button class="btn-primary" onclick="signUp()">রেজিস্ট্রেশন করুন</button>
-      <div class="switch-link" onclick="switchTab('signin')">← ইতিমধ্যে অ্যাকাউন্ট আছে?</div>
+      <div class="fg"><label>WhatsApp নম্বর</label><input type="tel" id="suWa" placeholder="+880..."/></div>
+      <div class="fg"><label>ইমেইল</label><input type="email" id="suEmail" placeholder="আপনার ইমেইল"/></div>
+      <div class="fg"><label>পাসওয়ার্ড</label><input type="password" id="suPass" placeholder="যেকোনো পাসওয়ার্ড"/></div>
+      <button class="btn" id="suBtn" onclick="doSignUp()">রেজিস্ট্রেশন করুন</button>
+      <div class="switch" onclick="switchTab('si')">← ইতিমধ্যে অ্যাকাউন্ট আছে?</div>
     </div>
   </div>
 </div>
 
-<!-- HOME SCREEN -->
+<!-- HOME -->
 <div id="homeScreen">
-  <div class="top-bar">
-    <div class="user-name" id="userName">স্বাগতম!</div>
-    <div class="daily-msg">প্রতিদিন তিনটায় ও নয়টায় অ্যাপে লগ ইন করে নতুন নতুন টিউশন অফার পান।</div>
+  <div class="topbar">
+    <div class="uname" id="greetName">👋 স্বাগতম!</div>
+    <div class="dmsg">প্রতিদিন তিনটায় ও নয়টায় অ্যাপে লগ ইন করে নতুন নতুন টিউশন অফার পান।</div>
   </div>
-  <div class="home-content">
+  <div class="hcontent">
     <div class="sos-wrap">
-      <button class="sos-btn" onclick="triggerSOS()">🆘 SOS</button>
-      <div class="sos-warning">আপনি রাস্তাঘাটে সেক্সুয়াল হ্যারাসমেন্টের শিকার হলে এই বাটনে ক্লিক করুন। আমরা তৎক্ষণিক ব্যবস্থা নেওয়ার চেষ্টা করব। তবে অযথা বাটন ক্লিক করলে আপনাকে ব্যান করা হবে।</div>
+      <button class="sos-btn" onclick="doSOS()">🆘 SOS</button>
+      <div class="sos-note">আপনি রাস্তাঘাটে সেক্সুয়াল হ্যারাসমেন্টের শিকার হলে এই বাটনে ক্লিক করুন। আমরা তৎক্ষণিক ব্যবস্থা নেওয়ার চেষ্টা করব।<br/><strong>অযথা ক্লিক করলে ব্যান করা হবে।</strong></div>
     </div>
-    <div class="two-boxes">
-      <div class="box-card" onclick="openTuitionTips()">
-        <div class="box-icon">📖</div>
-        <div class="box-title">কিভাবে টিউশন টিকিয়ে রাখবেন?</div>
-      </div>
-      <div class="box-card" onclick="openSafetyTips()">
-        <div class="box-icon">🛡️</div>
-        <div class="box-title">রাস্তায় নিরাপদ থাকার উপায়</div>
-      </div>
+    <div class="boxes">
+      <div class="box" onclick="openSheet('tuitionSheet')"><div class="box-icon">📖</div><div class="box-txt">কিভাবে টিউশন টিকিয়ে রাখবেন?</div></div>
+      <div class="box" onclick="openSheet('safetySheet')"><div class="box-icon">🛡️</div><div class="box-txt">রাস্তায় নিরাপদ থাকার উপায়</div></div>
     </div>
   </div>
-
-  <!-- BOTTOM NAV -->
-  <div class="bottom-nav">
-    <div class="nav-item" onclick="goTo('jobs.html')">
-      <span>💼</span><span>Jobs</span>
-    </div>
-    <div class="nav-item active">
-      <span>🏠</span><span>Home</span>
-    </div>
-    <div class="nav-item" onclick="goTo('safety.html')">
-      <span>🛡️</span><span>Safety</span>
-    </div>
-    <div class="nav-item" onclick="showTalkUs()">
-      <span>💬</span><span>Talk to Us</span>
-    </div>
+  <div class="bnav">
+    <div class="ni" onclick="go('jobs.html')"><span class="ic">💼</span><span>Jobs</span></div>
+    <div class="ni on"><span class="ic">🏠</span><span>Home</span></div>
+    <div class="ni" onclick="go('safety.html')"><span class="ic">🛡️</span><span>Safety</span></div>
+    <div class="ni" onclick="openSheet('talkSheet')"><span class="ic">💬</span><span>Talk to Us</span></div>
   </div>
 </div>
 
-<!-- TUITION TIPS MODAL -->
-<div class="modal-overlay" id="tuitionModal" onclick="closeModal('tuitionModal')">
-  <div class="modal-sheet" onclick="event.stopPropagation()">
-    <div class="modal-header">
-      <div class="modal-title">📖 টিউশন টিকিয়ে রাখার উপায়</div>
-      <button class="modal-close" onclick="closeModal('tuitionModal')">✕</button>
-    </div>
-    <div class="tip-item">১. টিউশনে গিয়ে ভদ্র ব্যবহার করুন — প্রথম দিন থেকেই পেশাদার মনোভাব দেখান।</div>
-    <div class="tip-item">২. স্টুডেন্টকে বোঝার চেষ্টা করুন — তার দুর্বল দিক আগে খুঁজে বের করুন।</div>
-    <div class="tip-item">৩. মেধাবী স্টুডেন্ট হলে তার মেধাকে চ্যালেঞ্জ করে এমন কঠিন তবে মজার কিছু পড়ান।</div>
-    <div class="tip-item">৪. দুর্বল স্টুডেন্ট হলে কঠিন কিছু পড়াবেন না — মজার ছলে, সহজ ভাবে পড়ান।</div>
-    <div class="tip-item">৫. প্রথম দিন পড়ানোর পর, গার্ডিয়ানের সাথে বেতন ও স্যালারি আলোচনা করে কনফার্মেশন লেটারে সাইন নিন।</div>
-    <div class="tip-item">৬. সময়মতো পৌঁছান — দেরি করলে গার্ডিয়ানের মন খারাপ হয় এবং টিউশন হারানোর সম্ভাবনা বাড়ে।</div>
-    <div class="tip-item">৭. মাসের শেষে বেতন চাওয়ার আগেই গার্ডিয়ানকে স্মরণ করিয়ে দিন বিনম্রভাবে।</div>
+<!-- TUITION TIPS -->
+<div class="overlay" id="tuitionSheet" onclick="closeSheet('tuitionSheet')">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <div class="sh-head"><div class="sh-title">📖 টিউশন টিকিয়ে রাখার উপায়</div><button class="sh-x" onclick="closeSheet('tuitionSheet')">✕</button></div>
+    <div class="tip">১. টিউশনে গিয়ে ভদ্র ব্যবহার করুন — প্রথম দিন থেকেই পেশাদার মনোভাব দেখান।</div>
+    <div class="tip">২. স্টুডেন্টকে বোঝার চেষ্টা করুন — তার দুর্বল দিক আগে খুঁজে বের করুন।</div>
+    <div class="tip">৩. মেধাবী স্টুডেন্ট হলে তার মেধাকে চ্যালেঞ্জ করে এমন কঠিন তবে মজার কিছু পড়ান।</div>
+    <div class="tip">৪. দুর্বল স্টুডেন্ট হলে কঠিন কিছু পড়াবেন না — মজার ছলে, সহজ ভাবে পড়ান।</div>
+    <div class="tip">৫. প্রথম দিন পড়ানোর পর, গার্ডিয়ানের সাথে বেতন আলোচনা করে কনফার্মেশন লেটারে সাইন নিন।</div>
+    <div class="tip">৬. সময়মতো পৌঁছান — দেরি করলে টিউশন হারানোর সম্ভাবনা বাড়ে।</div>
+    <div class="tip">৭. মাসের শেষে বেতন চাওয়ার আগেই গার্ডিয়ানকে বিনম্রভাবে স্মরণ করিয়ে দিন।</div>
   </div>
 </div>
 
-<!-- SAFETY TIPS MODAL -->
-<div class="modal-overlay" id="safetyModal" onclick="closeModal('safetyModal')">
-  <div class="modal-sheet" onclick="event.stopPropagation()">
-    <div class="modal-header">
-      <div class="modal-title">🛡️ রাস্তায় নিরাপদ থাকুন</div>
-      <button class="modal-close" onclick="closeModal('safetyModal')">✕</button>
-    </div>
-    <div class="tip-item">১. বাইরে যাওয়ার সময় পরিবারকে গন্তব্য জানান।</div>
-    <div class="tip-item">২. রাত হলে একা রাস্তায় চলাফেরা এড়িয়ে চলুন।</div>
-    <div class="tip-item">৩. হেডফোন দিয়ে গান শুনতে শুনতে হাঁটবেন না — সতর্ক থাকুন।</div>
-    <div class="tip-item">৪. অপরিচিত কোনো যানবাহনে উঠবেন না।</div>
-    <div class="tip-item">৫. বিপদে পড়লে জোরে "আগুন!" বলে চিৎকার করুন — মানুষ এগিয়ে আসবে।</div>
-    <div class="tip-item">৬. ফোনে সবসময় ২০% এর বেশি চার্জ রাখার চেষ্টা করুন।</div>
-    <div class="tip-item">৭. বিপদে এই অ্যাপের SOS বাটন চাপুন — আমরা সাথে আছি।</div>
+<!-- SAFETY TIPS -->
+<div class="overlay" id="safetySheet" onclick="closeSheet('safetySheet')">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <div class="sh-head"><div class="sh-title">🛡️ রাস্তায় নিরাপদ থাকুন</div><button class="sh-x" onclick="closeSheet('safetySheet')">✕</button></div>
+    <div class="tip">১. বাইরে যাওয়ার সময় পরিবারকে গন্তব্য জানান।</div>
+    <div class="tip">২. রাত হলে একা রাস্তায় চলাফেরা এড়িয়ে চলুন।</div>
+    <div class="tip">৩. হেডফোন দিয়ে গান শুনতে শুনতে হাঁটবেন না — সতর্ক থাকুন।</div>
+    <div class="tip">৪. অপরিচিত কোনো যানবাহনে একা উঠবেন না।</div>
+    <div class="tip">৫. বিপদে পড়লে জোরে "আগুন!" বলে চিৎকার করুন — মানুষ এগিয়ে আসবে।</div>
+    <div class="tip">৬. ফোনে সবসময় ২০% এর বেশি চার্জ রাখার চেষ্টা করুন।</div>
+    <div class="tip">৭. বিপদে এই অ্যাপের SOS বাটন চাপুন — আমরা সাথে আছি।</div>
   </div>
 </div>
 
-<!-- TALK TO US MODAL -->
-<div class="modal-overlay" id="talkModal" onclick="closeModal('talkModal')">
-  <div class="modal-sheet" onclick="event.stopPropagation()">
-    <div class="modal-header">
-      <div class="modal-title">💬 আমাদের সাথে যোগাযোগ করুন</div>
-      <button class="modal-close" onclick="closeModal('talkModal')">✕</button>
-    </div>
-    <div class="tip-item">📞 WhatsApp: +8801846156788</div>
-    <div class="tip-item">📧 Email: rayhanchy576@gmail.com</div>
-    <div class="tip-item">⏰ সোমবার – শুক্রবার, সকাল ৯টা – রাত ৯টা</div>
-    <div class="tip-item">যেকোনো সমস্যায় আমাদের সাথে যোগাযোগ করুন। আমরা সর্বদা আপনার পাশে আছি।</div>
+<!-- TALK TO US -->
+<div class="overlay" id="talkSheet" onclick="closeSheet('talkSheet')">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <div class="sh-head"><div class="sh-title">💬 আমাদের সাথে যোগাযোগ করুন</div><button class="sh-x" onclick="closeSheet('talkSheet')">✕</button></div>
+    <div class="tip">📞 WhatsApp: +8801846156788</div>
+    <div class="tip">📧 Email: rayhanchy576@gmail.com</div>
+    <div class="tip">⏰ সোমবার – শুক্রবার, সকাল ৯টা – রাত ৯টা</div>
+    <div class="tip">যেকোনো সমস্যায় আমাদের সাথে যোগাযোগ করুন। আমরা সর্বদা আপনার পাশে আছি।</div>
   </div>
 </div>
 
-<!-- PROFILE COLLECTION POPUP (shown 30s after login) -->
-<div class="profile-popup" id="profilePopup">
-  <div class="profile-card">
-    <div class="profile-title">🌸 আপনার প্রোফাইল সম্পূর্ণ করুন</div>
-    <div class="profile-sub">আমাদের কাছে আপনার নিরাপত্তা সর্বোচ্চ অগ্রাধিকার। বিপদে আমরা আপনার পাশে থাকব।</div>
-
-    <div class="field-group">
-      <label>📍 আপনি কোন জোনে টিউশন করাতে চান? (একাধিক বেছে নিতে পারেন)</label>
-      <input type="text" id="zoneSearch" placeholder="এলাকার নাম লিখুন..." oninput="filterZones(this.value)" style="margin-bottom:8px"/>
+<!-- PROFILE POPUP -->
+<div class="pp-ov" id="profilePopup">
+  <div class="pp-card">
+    <div class="pp-title">🌸 প্রোফাইল সম্পূর্ণ করুন</div>
+    <div class="pp-sub">আমাদের কাছে আপনার নিরাপত্তা সর্বোচ্চ অগ্রাধিকার।</div>
+    <div class="fg">
+      <label>📍 কোন জোনে টিউশন করাতে চান?</label>
+      <input type="text" id="zoneSearch" placeholder="এলাকার নাম লিখুন..." oninput="buildZones(this.value)" style="margin-bottom:8px"/>
       <div class="zone-grid" id="zoneGrid"></div>
     </div>
-
-    <div class="field-group">
-      <label>👩‍💼 বিপদে আমরা আপনার বিশ্ববিদ্যালয়ের কোন বন্ধুর সাথে যোগাযোগ করব?</label>
-      <input type="text" id="friendName" placeholder="বন্ধুর নাম"/>
-    </div>
-    <div class="field-group">
-      <label>📱 সেই বন্ধুর ফোন নম্বর</label>
-      <input type="tel" id="friendPhone" placeholder="+880..."/>
-    </div>
-    <div class="field-group">
-      <label>🎓 বন্ধুর ডিপার্টমেন্ট ও নাম</label>
-      <input type="text" id="friendDept" placeholder="যেমন: CSE, ঢাকা বিশ্ববিদ্যালয়"/>
-    </div>
-    <div class="field-group">
-      <label>👨‍👩‍👧 বাবা অথবা মায়ের ফোন নম্বর</label>
-      <input type="tel" id="parentPhone" placeholder="+880..."/>
-    </div>
-    <button class="btn-primary" onclick="saveProfile()">সংরক্ষণ করুন ✓</button>
+    <div class="fg"><label>👩‍💼 বিপদে কোন বন্ধুর সাথে যোগাযোগ করব?</label><input type="text" id="ppFriend" placeholder="বন্ধুর নাম"/></div>
+    <div class="fg"><label>📱 সেই বন্ধুর ফোন নম্বর</label><input type="tel" id="ppFriendPh" placeholder="+880..."/></div>
+    <div class="fg"><label>🎓 বন্ধুর ডিপার্টমেন্ট</label><input type="text" id="ppFriendDept" placeholder="যেমন: CSE, ঢাবি"/></div>
+    <div class="fg"><label>👨‍👩‍👧 বাবা অথবা মায়ের নম্বর</label><input type="tel" id="ppParent" placeholder="+880..."/></div>
+    <button class="btn" onclick="saveProfile()">সংরক্ষণ করুন ✓</button>
+    <div class="switch" onclick="closeProfile()" style="margin-top:10px">পরে করব</div>
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const SB_URL  = 'https://fxkmanginfisqzmjomji.supabase.co';
+const SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4a21hbmdpbmZpc3F6bWpvbWppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2NjgwNjUsImV4cCI6MjA5MjI0NDA2NX0.sCS6HrZCPyqFMPLJFSFIQO_aUzp75DWfpg1ElVi2cyc';
+const TG_TOK  = '7447671480:AAFtEWOh_y3k5UpIeUnV-5fJdV3L-RlqC6M';
+const TG_CHAT = '906269717';
+const sb = supabase.createClient(SB_URL, SB_KEY);
+
+const UNIS = ["University of Dhaka","Bangladesh University of Engineering and Technology","Jahangirnagar University","Bangladesh University of Professionals","Jagannath University","Dhaka University of Engineering and Technology","Bangladesh University of Textiles","Bangabandhu Sheikh Mujib Medical University","Bangladesh University of Health Sciences","National University of Bangladesh","University of Chittagong","Chittagong University of Engineering and Technology","Chittagong Medical University","Chittagong Veterinary and Animal Sciences University","Bangabandhu Sheikh Mujibur Rahman Maritime University","Military Institute of Science and Technology","North South University","BRAC University","Independent University Bangladesh","American International University-Bangladesh","East West University","United International University","Daffodil International University","Ahsanullah University of Science and Technology","Stamford University Bangladesh","Southeast University","University of Liberal Arts Bangladesh","Primeasia University","Green University of Bangladesh","Sonargaon University","City University","World University of Bangladesh","Atish Dipankar University of Science and Technology","International Islamic University Chittagong","Premier University","University of Science and Technology Chittagong","East Delta University","Port City International University","BGC Trust University Bangladesh","Dhaka Medical College","Sir Salimullah Medical College","Shaheed Suhrawardy Medical College","Mugda Medical College","Kurmitola General Hospital Medical College","Bangladesh Medical College","Green Life Medical College","Ad-din Women's Medical College","Ibrahim Medical College","Enam Medical College","City Medical College","Monno Medical College","Chittagong Medical College","Cox's Bazar Medical College","USTC Medical College","BGC Trust Medical College","Parkview Medical College"];
+
+const ZONES = {
+  "Zone 1":{l:"Zone 1 – Mirpur/Kafrul",a:["Mirpur","Pallabi","Kafrul","Cantonment","Agargaon","Shewrapara"]},
+  "Zone 2":{l:"Zone 2 – Narayanganj",a:["Fatullah","Siddhirganj","Kanchpur","Bandar"]},
+  "Zone 3":{l:"Zone 3 – Uttara/Airport",a:["Sector 1-18","Airport","Khilkhet","Tongi","Gazipur","Uttarkhan"]},
+  "Zone 4":{l:"Zone 4 – Mohammadpur",a:["Mohammadpur","Panthapath","Farmgate","Science Lab","Shyamoli","Bosila"]},
+  "Zone 5":{l:"Zone 5 – Gulshan/Banani",a:["Gulshan","Banani","Baridhara","Bashundhara","Niketon"]},
+  "Zone 6":{l:"Zone 6 – Rampura/Badda",a:["Rampura","Banasree","Badda","Merul Badda","Shahzadpur"]},
+  "Zone 7":{l:"Zone 7 – Moghbazar",a:["Moghbazar","Khilgaon","Basabo","Rajarbagh","Bailey Road"]},
+  "Zone 8":{l:"Zone 8 – Lalbagh/Motijheel",a:["Lalbagh","Motijheel","Paltan","Azimpur","New Market","Shahbag"]},
+  "Zone 9":{l:"Zone 9 – Demra/Jatrabari",a:["Demra","Donia","Matuail","Rayerbagh","Jurain"]},
+  "Zone 10":{l:"Zone 10 – Savar/Ashulia",a:["Ashulia","Gabtoli","Savar","Amin Bazar"]}
+};
+
 let selectedUni = '';
 let selectedZones = [];
+
+// PWA
 let deferredPrompt = null;
-
-// PWA install
 window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  deferredPrompt = e;
-  document.getElementById('installBanner').style.display = 'block';
+  e.preventDefault(); deferredPrompt = e;
+  document.getElementById('installBanner').style.display = 'flex';
 });
-window.addEventListener('appinstalled', () => {
-  document.getElementById('installBanner').style.display = 'none';
-});
-document.getElementById('installBtn').addEventListener('click', async () => {
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') document.getElementById('installBanner').style.display = 'none';
-    deferredPrompt = null;
-  }
-});
+window.addEventListener('appinstalled', () => { document.getElementById('installBanner').style.display = 'none'; });
+document.getElementById('installBtn').onclick = async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const {outcome} = await deferredPrompt.userChoice;
+  if (outcome === 'accepted') document.getElementById('installBanner').style.display = 'none';
+  deferredPrompt = null;
+};
+document.getElementById('bannerClose').onclick = () => { document.getElementById('installBanner').style.display = 'none'; };
 
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
 
-function switchTab(tab) {
-  document.getElementById('signinForm').style.display = tab === 'signin' ? 'block' : 'none';
-  document.getElementById('signupForm').style.display = tab === 'signup' ? 'block' : 'none';
-  document.querySelectorAll('.auth-tab').forEach((t, i) => t.classList.toggle('active', (i === 0) === (tab === 'signin')));
+// TABS
+function switchTab(t) {
+  document.getElementById('formSI').style.display = t==='si'?'block':'none';
+  document.getElementById('formSU').style.display = t==='su'?'block':'none';
+  document.getElementById('tabSI').className = 'tab'+(t==='si'?' on':'');
+  document.getElementById('tabSU').className = 'tab'+(t==='su'?' on':'');
 }
 
-function filterUni(val) {
-  const dd = document.getElementById('uniDropdown');
-  if (!val) { dd.style.display = 'none'; return; }
+// UNI AUTOCOMPLETE
+function onUniInput(val) {
+  const dd = document.getElementById('uniDD');
+  if (!val.trim()) { dd.style.display='none'; return; }
   const lv = val.toLowerCase();
-  let matches = UNIVERSITIES.filter(u => u.toLowerCase().includes(lv));
-  if (!matches.length) matches = ['National University of Bangladesh'];
-  dd.innerHTML = matches.map(u => `<div class="uni-option" onclick="selectUni('${u.replace(/'/g,"\\'")}');event.stopPropagation()">${u}</div>`).join('');
+  let m = UNIS.filter(u=>u.toLowerCase().includes(lv));
+  if (!m.length) m = ['National University of Bangladesh'];
+  dd.innerHTML = m.slice(0,8).map(u=>`<div class="uni-opt" onmousedown="pickUni('${u.replace(/'/g,"\\'")}');return false">${u}</div>`).join('');
   dd.style.display = 'block';
 }
-function selectUni(u) {
+function pickUni(u) {
   selectedUni = u;
   document.getElementById('suUni').value = u;
-  document.getElementById('uniDropdown').style.display = 'none';
+  document.getElementById('uniDD').style.display = 'none';
 }
-document.addEventListener('click', () => document.getElementById('uniDropdown').style.display = 'none');
+document.addEventListener('click', e => {
+  if (!e.target.closest('#suUni') && !e.target.closest('#uniDD'))
+    document.getElementById('uniDD').style.display = 'none';
+});
 
-async function signUp() {
-  const name = document.getElementById('suName').value.trim();
-  const uni = selectedUni || document.getElementById('suUni').value.trim();
-  const wa = document.getElementById('suWa').value.trim();
-  const email = document.getElementById('suEmail').value.trim();
-  const pass = document.getElementById('suPass').value;
-  if (!name || !email || !pass || !wa) { showToast('সব তথ্য দিন'); return; }
-  const btn = document.querySelector('#signupForm .btn-primary');
-  btn.textContent = 'অপেক্ষা করুন...'; btn.disabled = true;
-  const { data, error } = await supabase.auth.signUp({ email, password: pass, options: { data: { name, university: uni, whatsapp: wa } } });
-  btn.textContent = 'রেজিস্ট্রেশন করুন'; btn.disabled = false;
-  if (error) { showToast('ত্রুটি: ' + error.message); return; }
-  if (data.user) {
-    await supabase.from('profiles').upsert({ id: data.user.id, name, university: uni, whatsapp: wa, email, is_new: true });
-    localStorage.setItem('tm_user', JSON.stringify({ id: data.user.id, name, university: uni, whatsapp: wa, email }));
-    showToast('রেজিস্ট্রেশন সফল!');
-    showHome(name, true);
-  }
-}
-
-async function signIn() {
-  const email = document.getElementById('siEmail').value.trim();
-  const pass = document.getElementById('siPass').value;
-  if (!email || !pass) { showToast('ইমেইল ও পাসওয়ার্ড দিন'); return; }
-  const btn = document.querySelector('#signinForm .btn-primary');
-  btn.textContent = 'অপেক্ষা করুন...'; btn.disabled = true;
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
-  btn.textContent = 'লগ ইন করুন'; btn.disabled = false;
-  if (error) { showToast('ভুল ইমেইল বা পাসওয়ার্ড'); return; }
-  const { data: profile } = await supabase.from('profiles').select('*').eq('id', data.user.id).single();
-  const u = { id: data.user.id, name: profile?.name || data.user.user_metadata?.name || 'ব্যবহারকারী', university: profile?.university || '', whatsapp: profile?.whatsapp || '', email, role: profile?.role || 'user', banned: profile?.banned };
-  if (u.banned) { showToast('আপনার অ্যাকাউন্ট ব্যান করা হয়েছে'); await supabase.auth.signOut(); return; }
-  localStorage.setItem('tm_user', JSON.stringify(u));
-  showHome(u.name, profile?.is_new || false);
+// SIGN UP
+async function doSignUp() {
+  const name=document.getElementById('suName').value.trim();
+  const uni=selectedUni||document.getElementById('suUni').value.trim();
+  const wa=document.getElementById('suWa').value.trim();
+  const email=document.getElementById('suEmail').value.trim();
+  const pass=document.getElementById('suPass').value;
+  if (!name||!email||!pass||!wa) { toast('সব তথ্য পূরণ করুন'); return; }
+  const btn=document.getElementById('suBtn');
+  btn.disabled=true; btn.textContent='অপেক্ষা করুন...';
+  try {
+    const {data,error}=await sb.auth.signUp({email,password:pass,options:{data:{name,university:uni,whatsapp:wa}}});
+    if (error) { toast('ত্রুটি: '+error.message); return; }
+    if (data.user) {
+      await sb.from('profiles').upsert({id:data.user.id,name,university:uni,whatsapp:wa,email,is_new:true});
+      saveLocal({id:data.user.id,name,university:uni,whatsapp:wa,email});
+      toast('রেজিস্ট্রেশন সফল! ✓');
+      showHome(name,true);
+    }
+  } catch(e) { toast('নেটওয়ার্ক সমস্যা। আবার চেষ্টা করুন।'); }
+  finally { btn.disabled=false; btn.textContent='রেজিস্ট্রেশন করুন'; }
 }
 
-function showHome(name, isNew) {
-  document.getElementById('authScreen').style.display = 'none';
-  document.getElementById('homeScreen').style.display = 'block';
-  document.getElementById('userName').textContent = '👋 ' + name;
-  if (isNew) setTimeout(() => showProfilePopup(), 30000);
+// SIGN IN
+async function doSignIn() {
+  const email=document.getElementById('siEmail').value.trim();
+  const pass=document.getElementById('siPass').value;
+  if (!email||!pass) { toast('ইমেইল ও পাসওয়ার্ড দিন'); return; }
+  const btn=document.getElementById('siBtn');
+  btn.disabled=true; btn.textContent='অপেক্ষা করুন...';
+  try {
+    const {data,error}=await sb.auth.signInWithPassword({email,password:pass});
+    if (error) { toast('ভুল ইমেইল বা পাসওয়ার্ড'); return; }
+    const {data:p}=await sb.from('profiles').select('*').eq('id',data.user.id).single();
+    if (p?.banned) { toast('আপনার অ্যাকাউন্ট ব্যান করা হয়েছে'); await sb.auth.signOut(); return; }
+    const u={id:data.user.id,name:p?.name||'ব্যবহারকারী',university:p?.university||'',whatsapp:p?.whatsapp||'',email,role:p?.role||'user'};
+    saveLocal(u);
+    showHome(u.name,p?.is_new||false);
+  } catch(e) { toast('নেটওয়ার্ক সমস্যা। আবার চেষ্টা করুন।'); }
+  finally { btn.disabled=false; btn.textContent='লগ ইন করুন'; }
 }
 
-async function triggerSOS() {
-  const u = getUser();
-  if (!u) return;
-  if (!confirm('আপনি কি সত্যিই বিপদে আছেন? মিথ্যা বলা হলে ব্যান হবেন।')) return;
-  await sendSOS(u);
-  await supabase.from('sos_alerts').insert({ user_id: u.id, name: u.name, whatsapp: u.whatsapp, university: u.university });
-  showToast('🆘 আমাদের জানানো হয়েছে! সাহায্য আসছে।');
+function showHome(name,isNew) {
+  document.getElementById('authScreen').style.display='none';
+  document.getElementById('homeScreen').style.display='block';
+  document.getElementById('greetName').textContent='👋 '+name;
+  if (isNew) setTimeout(openProfilePopup,30000);
 }
 
-function openTuitionTips() { document.getElementById('tuitionModal').classList.add('active'); }
-function openSafetyTips() { document.getElementById('safetyModal').classList.add('active'); }
-function showTalkUs() { document.getElementById('talkModal').classList.add('active'); }
-function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-
-function showProfilePopup() {
-  buildZoneGrid('');
-  document.getElementById('profilePopup').classList.add('active');
+// SOS
+async function doSOS() {
+  const u=getLocal(); if (!u) return;
+  if (!confirm('আপনি কি সত্যিই বিপদে আছেন?\nমিথ্যা হলে ব্যান করা হবে।')) return;
+  const msg=`🚨 SOS ALERT!\n👩 Name: ${u.name}\n📞 WhatsApp: ${u.whatsapp}\n🎓 University: ${u.university}\n⏰ ${new Date().toLocaleString()}`;
+  try {
+    await fetch(`https://api.telegram.org/bot${TG_TOK}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:TG_CHAT,text:msg})});
+    await sb.from('sos_alerts').insert({user_id:u.id,name:u.name,whatsapp:u.whatsapp,university:u.university});
+  } catch(e) {}
+  toast('🆘 আমাদের জানানো হয়েছে! সাহায্য আসছে।');
 }
-function filterZones(val) { buildZoneGrid(val); }
-function buildZoneGrid(filter) {
-  const g = document.getElementById('zoneGrid');
-  g.innerHTML = '';
-  Object.entries(ZONES).forEach(([key, z]) => {
-    const show = !filter || z.label.toLowerCase().includes(filter.toLowerCase()) || z.areas.some(a => a.toLowerCase().includes(filter.toLowerCase()));
-    if (!show) return;
-    const div = document.createElement('div');
-    div.className = 'zone-chip' + (selectedZones.includes(key) ? ' selected' : '');
-    div.textContent = z.label.split('–')[0].trim();
-    div.title = z.areas.join(', ');
-    div.onclick = () => {
-      if (selectedZones.includes(key)) selectedZones = selectedZones.filter(z => z !== key);
-      else selectedZones.push(key);
-      buildZoneGrid(document.getElementById('zoneSearch').value);
-    };
-    g.appendChild(div);
+
+// SHEETS
+function openSheet(id) { document.getElementById(id).classList.add('open'); }
+function closeSheet(id) { document.getElementById(id).classList.remove('open'); }
+
+// PROFILE POPUP
+function openProfilePopup() { buildZones(''); document.getElementById('profilePopup').classList.add('open'); }
+function closeProfile() { document.getElementById('profilePopup').classList.remove('open'); }
+function buildZones(filter) {
+  const g=document.getElementById('zoneGrid'); g.innerHTML='';
+  const f=(filter||'').toLowerCase();
+  Object.entries(ZONES).forEach(([key,z])=>{
+    if (f && !z.l.toLowerCase().includes(f) && !z.a.some(a=>a.toLowerCase().includes(f))) return;
+    const d=document.createElement('div');
+    d.className='zc'+(selectedZones.includes(key)?' on':'');
+    d.textContent=z.l.split('–')[0].trim();
+    d.onclick=()=>{ selectedZones.includes(key)?selectedZones=selectedZones.filter(x=>x!==key):selectedZones.push(key); buildZones(document.getElementById('zoneSearch').value); };
+    g.appendChild(d);
   });
 }
 async function saveProfile() {
-  const u = getUser();
-  if (!u) return;
-  const data = { zones: selectedZones, friend_name: document.getElementById('friendName').value, friend_phone: document.getElementById('friendPhone').value, friend_dept: document.getElementById('friendDept').value, parent_phone: document.getElementById('parentPhone').value, is_new: false };
-  await supabase.from('profiles').update(data).eq('id', u.id);
-  document.getElementById('profilePopup').classList.remove('active');
-  showToast('প্রোফাইল সংরক্ষণ হয়েছে ✓');
+  const u=getLocal(); if (!u) return;
+  await sb.from('profiles').update({zones:selectedZones,friend_name:document.getElementById('ppFriend').value,friend_phone:document.getElementById('ppFriendPh').value,friend_dept:document.getElementById('ppFriendDept').value,parent_phone:document.getElementById('ppParent').value,is_new:false}).eq('id',u.id);
+  closeProfile(); toast('প্রোফাইল সংরক্ষণ হয়েছে ✓');
 }
 
-function goTo(page) { window.location.href = page; }
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
+// HELPERS
+function saveLocal(u){localStorage.setItem('tm_user',JSON.stringify(u));}
+function getLocal(){try{return JSON.parse(localStorage.getItem('tm_user')||'null');}catch{return null;}}
+function go(url){window.location.href=url;}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),3200);}
 
-// Auto-login check
-(async () => {
-  const { data } = await supabase.auth.getSession();
-  if (data.session) {
-    const u = getUser();
-    if (u) showHome(u.name, false);
-  }
+// AUTO LOGIN
+(async()=>{
+  try {
+    const {data}=await sb.auth.getSession();
+    if (data.session) {
+      let u=getLocal();
+      if (!u) {
+        const {data:p}=await sb.from('profiles').select('*').eq('id',data.session.user.id).single();
+        if (p) { u={id:data.session.user.id,name:p.name,university:p.university,whatsapp:p.whatsapp,email:data.session.user.email,role:p.role||'user'}; saveLocal(u); }
+      }
+      if (u) showHome(u.name,false);
+    }
+  } catch(e){}
 })();
 </script>
 </body>
