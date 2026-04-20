@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<title>Admin – TuitionMedia</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial,sans-serif;min-height:100vh;background:#0f0a1e;color:#fff}
+.admin-login{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:linear-gradient(135deg,#1a0a2e,#2d0a3e)}
+.admin-login h1{font-size:28px;font-weight:900;color:#ff3369;margin-bottom:6px}
+.admin-login p{font-size:13px;color:#c4005a;margin-bottom:24px}
+.login-card{background:rgba(255,255,255,0.05);border:1px solid rgba(255,51,105,0.3);border-radius:20px;padding:28px;width:100%;max-width:380px;backdrop-filter:blur(12px)}
+.field{margin-bottom:16px}
+.field label{font-size:12px;font-weight:700;color:#ff99bb;margin-bottom:6px;display:block}
+.field input{width:100%;padding:12px 16px;background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,51,105,0.25);border-radius:10px;color:#fff;font-size:14px;font-family:Arial,sans-serif;outline:none}
+.field input:focus{border-color:#ff3369}
+.btn-red{width:100%;padding:13px;background:linear-gradient(135deg,#e0004e,#ff3369);color:#fff;border:none;border-radius:12px;font-size:15px;font-family:Arial,sans-serif;font-weight:700;cursor:pointer;margin-top:6px}
+
+/* ADMIN DASHBOARD */
+#adminDash{display:none;min-height:100vh;background:#0f0a1e}
+.admin-header{background:linear-gradient(135deg,#1a0a2e,#2d0036);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,51,105,0.2)}
+.admin-header h1{font-size:20px;font-weight:900;color:#ff3369}
+.admin-tabs{display:flex;gap:6px;overflow-x:auto;padding:12px 16px;background:rgba(0,0,0,0.3);border-bottom:1px solid rgba(255,51,105,0.15)}
+.tab-btn{padding:8px 16px;border-radius:20px;border:1.5px solid rgba(255,51,105,0.3);background:rgba(255,51,105,0.06);color:#ff99bb;font-size:13px;font-family:Arial,sans-serif;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .2s}
+.tab-btn.active{background:linear-gradient(135deg,#e0004e,#ff3369);color:#fff;border-color:transparent}
+.tab-content{padding:16px;display:none}
+.tab-content.active{display:block}
+
+/* CARDS */
+.admin-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,51,105,0.2);border-radius:14px;padding:16px;margin-bottom:12px}
+.admin-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.user-name-admin{font-size:15px;font-weight:700;color:#ff99bb}
+.user-meta{font-size:12px;color:#a0a0c0;margin-top:2px}
+.badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;margin-right:4px}
+.badge-admin{background:#e0004e;color:#fff}
+.badge-mod{background:#7c3aed;color:#fff}
+.badge-user{background:rgba(255,255,255,0.1);color:#ccc}
+.badge-banned{background:#333;color:#ff6666}
+.action-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.action-btn{padding:6px 12px;border-radius:8px;border:1px solid;font-size:12px;font-family:Arial,sans-serif;cursor:pointer;font-weight:600}
+.btn-make-mod{background:rgba(124,58,237,0.15);border-color:rgba(124,58,237,0.4);color:#a78bfa}
+.btn-make-admin{background:rgba(224,0,78,0.15);border-color:rgba(224,0,78,0.4);color:#ff3369}
+.btn-ban{background:rgba(255,50,50,0.1);border-color:rgba(255,50,50,0.3);color:#f87171}
+.btn-unban{background:rgba(0,200,100,0.1);border-color:rgba(0,200,100,0.3);color:#6ee7b7}
+
+/* TUITION FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-field{display:flex;flex-direction:column;gap:6px}
+.form-field label{font-size:12px;font-weight:700;color:#ff99bb}
+.form-field input, .form-field select, .form-field textarea{padding:10px 14px;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,51,105,0.2);border-radius:10px;color:#fff;font-size:13px;font-family:Arial,sans-serif;outline:none}
+.form-field textarea{resize:vertical;min-height:80px}
+.form-field select option{background:#1a0a2e;color:#fff}
+.span-2{grid-column:span 2}
+.tuition-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,51,105,0.2);border-radius:14px;padding:16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.tuition-info h3{font-size:14px;font-weight:700;color:#ff99bb;margin-bottom:6px}
+.tuition-info p{font-size:12px;color:#a0a0c0;line-height:1.8}
+.tuition-actions{display:flex;flex-direction:column;gap:6px;min-width:120px}
+.status-badge{display:inline-block;padding:4px 12px;border-radius:10px;font-size:11px;font-weight:700}
+.status-available{background:rgba(0,200,100,0.15);color:#6ee7b7;border:1px solid rgba(0,200,100,0.3)}
+.status-booked{background:rgba(255,170,0,0.15);color:#fcd34d;border:1px solid rgba(255,170,0,0.3)}
+.status-hidden{background:rgba(100,100,100,0.2);color:#9ca3af;border:1px solid rgba(100,100,100,0.3)}
+
+/* APPLICANTS */
+.applicant-row{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(255,255,255,0.03);border-radius:10px;margin-bottom:6px;flex-wrap:wrap;gap:8px}
+.applicant-info{font-size:13px;color:#e0e0f0}
+.rank-badge{padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700;background:linear-gradient(135deg,#e0004e,#ff3369);color:#fff}
+
+/* SEARCH */
+.search-row{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.search-input{flex:1;padding:10px 14px;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,51,105,0.2);border-radius:10px;color:#fff;font-size:13px;font-family:Arial,sans-serif;outline:none;min-width:180px}
+.search-btn{padding:10px 18px;background:linear-gradient(135deg,#e0004e,#ff3369);color:#fff;border:none;border-radius:10px;font-size:13px;font-family:Arial,sans-serif;font-weight:700;cursor:pointer}
+
+.section-title{font-size:16px;font-weight:800;color:#ff3369;margin-bottom:14px}
+#toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);background:#333;color:#fff;padding:10px 24px;border-radius:24px;font-size:13px;z-index:9999;transition:transform .3s;pointer-events:none}
+#toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+
+<!-- LOGIN SCREEN -->
+<div class="admin-login" id="adminLogin">
+  <h1>🔐 Admin Panel</h1>
+  <p>TuitionMedia Dashboard</p>
+  <div class="login-card">
+    <div class="field"><label>Email</label><input type="email" id="aEmail" value="rayhanchy576@gmail.com"/></div>
+    <div class="field"><label>Password</label><input type="password" id="aPass" placeholder="পাসওয়ার্ড"/></div>
+    <button class="btn-red" onclick="adminLogin()">লগ ইন করুন</button>
+  </div>
+</div>
+
+<!-- ADMIN DASHBOARD -->
+<div id="adminDash">
+  <div class="admin-header">
+    <h1>🔴 TuitionMedia Admin</h1>
+    <button class="action-btn btn-ban" onclick="adminLogout()">লগ আউট</button>
+  </div>
+  <div class="admin-tabs">
+    <button class="tab-btn active" onclick="switchTab('users')">👥 Users</button>
+    <button class="tab-btn" onclick="switchTab('tuitions')">📋 Tuitions</button>
+    <button class="tab-btn" onclick="switchTab('add-tuition')">➕ Add Tuition</button>
+    <button class="tab-btn" onclick="switchTab('applicants')">📝 Applicants</button>
+    <button class="tab-btn" onclick="switchTab('sos')">🆘 SOS Alerts</button>
+    <button class="tab-btn" onclick="switchTab('directory')">📁 Directory</button>
+  </div>
+
+  <!-- USERS TAB -->
+  <div class="tab-content active" id="tab-users">
+    <div class="section-title">👥 সকল ব্যবহারকারী</div>
+    <div class="search-row">
+      <input class="search-input" id="userSearch" placeholder="নাম বা ইউনিভার্সিটি খুঁজুন..." oninput="filterUsers(this.value)"/>
+    </div>
+    <div id="usersList"><p style="color:#999">লোড হচ্ছে...</p></div>
+  </div>
+
+  <!-- TUITIONS TAB -->
+  <div class="tab-content" id="tab-tuitions">
+    <div class="section-title">📋 সকল টিউশন</div>
+    <div id="tuitionsList"><p style="color:#999">লোড হচ্ছে...</p></div>
+  </div>
+
+  <!-- ADD TUITION TAB -->
+  <div class="tab-content" id="tab-add-tuition">
+    <div class="section-title">➕ নতুন টিউশন যোগ করুন</div>
+    <div class="form-grid">
+      <div class="form-field"><label>টাইটেল</label><input type="text" id="nt_title" placeholder="Class 9-10 Math টিউশন"/></div>
+      <div class="form-field"><label>স্যালারি (টাকা)</label><input type="number" id="nt_salary" placeholder="5000"/></div>
+      <div class="form-field"><label>বিষয়</label><input type="text" id="nt_subject" placeholder="গণিত, ইংরেজি..."/></div>
+      <div class="form-field"><label>লোকেশন</label><input type="text" id="nt_location" placeholder="মিরপুর-১০"/></div>
+      <div class="form-field"><label>Zone</label>
+        <select id="nt_zone">
+          <option value="">বেছে নিন</option>
+          <option>Zone 1</option><option>Zone 2</option><option>Zone 3</option><option>Zone 4</option><option>Zone 5</option>
+          <option>Zone 6</option><option>Zone 7</option><option>Zone 8</option><option>Zone 9</option><option>Zone 10</option>
+        </select>
+      </div>
+      <div class="form-field"><label>ক্লাস</label><input type="text" id="nt_class" placeholder="Class 9-10"/></div>
+      <div class="form-field"><label>দিন/সপ্তাহ</label><input type="text" id="nt_days" placeholder="সপ্তাহে ৩ দিন"/></div>
+      <div class="form-field"><label>সময়</label><input type="text" id="nt_time" placeholder="বিকাল ৪টা"/></div>
+      <div class="form-field"><label>তারিখ</label><input type="date" id="nt_date"/></div>
+      <div class="form-field"><label>স্ট্যাটাস</label>
+        <select id="nt_status">
+          <option value="available">Available – Show on Website</option>
+          <option value="booked">Booked – Not Shown</option>
+          <option value="hidden">Hidden</option>
+        </select>
+      </div>
+      <div class="form-field span-2"><label>বিস্তারিত</label><textarea id="nt_desc" placeholder="টিউশনের বিস্তারিত তথ্য..."></textarea></div>
+    </div>
+    <button class="btn-red" style="margin-top:16px;max-width:300px" onclick="addTuition()">টিউশন যোগ করুন</button>
+  </div>
+
+  <!-- APPLICANTS TAB -->
+  <div class="tab-content" id="tab-applicants">
+    <div class="section-title">📝 আবেদনকারীরা</div>
+    <div id="applicantsList"><p style="color:#999">লোড হচ্ছে...</p></div>
+  </div>
+
+  <!-- SOS TAB -->
+  <div class="tab-content" id="tab-sos">
+    <div class="section-title">🆘 SOS অ্যালার্ট</div>
+    <div id="sosList"><p style="color:#999">লোড হচ্ছে...</p></div>
+  </div>
+
+  <!-- DIRECTORY TAB -->
+  <div class="tab-content" id="tab-directory">
+    <div class="section-title">📁 User Directory</div>
+    <div class="search-row">
+      <input class="search-input" id="dirSearch" placeholder="বিশ্ববিদ্যালয় দিয়ে খুঁজুন..." oninput="filterDirectory(this.value)"/>
+      <button class="search-btn" onclick="filterDirectory(document.getElementById('dirSearch').value)">খুঁজুন</button>
+    </div>
+    <div id="dirList"><p style="color:#999">লোড হচ্ছে...</p></div>
+  </div>
+</div>
+
+<script>
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const ADMIN_EMAIL = 'rayhanchy576@gmail.com';
+let allUsers = [];
+let allTuitions = [];
+let currentAdminSession = null;
+
+async function adminLogin() {
+  const email = document.getElementById('aEmail').value.trim();
+  const pass = document.getElementById('aPass').value;
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
+  if (error) { showToast('ভুল ইমেইল বা পাসওয়ার্ড'); return; }
+  if (email !== ADMIN_EMAIL) {
+    const { data: p } = await supabase.from('profiles').select('role').eq('id', data.user.id).single();
+    if (!p || (p.role !== 'admin' && p.role !== 'moderator')) { showToast('আপনার অ্যাডমিন অ্যাক্সেস নেই'); await supabase.auth.signOut(); return; }
+  }
+  currentAdminSession = data.user;
+  document.getElementById('adminLogin').style.display = 'none';
+  document.getElementById('adminDash').style.display = 'block';
+  loadUsers(); loadTuitions(); loadApplicants(); loadSOS(); loadDirectory();
+}
+
+function adminLogout() { supabase.auth.signOut(); window.location.reload(); }
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// USERS
+async function loadUsers() {
+  const { data } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
+  allUsers = data || [];
+  renderUsers(allUsers);
+}
+
+function renderUsers(users) {
+  const c = document.getElementById('usersList');
+  if (!users.length) { c.innerHTML = '<p style="color:#999">কোনো ব্যবহারকারী নেই</p>'; return; }
+  c.innerHTML = users.map(u => `
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <div>
+          <div class="user-name-admin">${u.name || '-'}</div>
+          <div class="user-meta">📧 ${u.email || '-'} | 📱 ${u.whatsapp || '-'}</div>
+          <div class="user-meta">🎓 ${u.university || '-'}</div>
+        </div>
+        <div>
+          <span class="badge badge-${u.role || 'user'}">${u.role || 'user'}</span>
+          ${u.banned ? '<span class="badge badge-banned">BANNED</span>' : ''}
+        </div>
+      </div>
+      <div class="action-row">
+        <button class="action-btn btn-make-mod" onclick="setRole('${u.id}','moderator')">Moderator করুন</button>
+        <button class="action-btn btn-make-admin" onclick="setRole('${u.id}','admin')">Admin করুন</button>
+        <button class="action-btn btn-make-mod" onclick="setRole('${u.id}','user')">User করুন</button>
+        ${u.banned 
+          ? `<button class="action-btn btn-unban" onclick="setBan('${u.id}',false)">Unban করুন</button>`
+          : `<button class="action-btn btn-ban" onclick="setBan('${u.id}',true)">Ban করুন</button>`}
+      </div>
+    </div>`).join('');
+}
+
+function filterUsers(v) {
+  const f = v.toLowerCase();
+  renderUsers(allUsers.filter(u => (u.name||'').toLowerCase().includes(f) || (u.university||'').toLowerCase().includes(f) || (u.email||'').toLowerCase().includes(f)));
+}
+
+async function setRole(id, role) {
+  await supabase.from('profiles').update({ role }).eq('id', id);
+  showToast('Role আপডেট হয়েছে');
+  loadUsers();
+}
+async function setBan(id, banned) {
+  await supabase.from('profiles').update({ banned }).eq('id', id);
+  showToast(banned ? 'ব্যান করা হয়েছে' : 'আনব্যান হয়েছে');
+  loadUsers();
+}
+
+// TUITIONS
+async function loadTuitions() {
+  const { data } = await supabase.from('tuitions').select('*').order('created_at', { ascending: false });
+  allTuitions = data || [];
+  renderTuitions(allTuitions);
+}
+
+function renderTuitions(list) {
+  const c = document.getElementById('tuitionsList');
+  if (!list.length) { c.innerHTML = '<p style="color:#999">কোনো টিউশন নেই</p>'; return; }
+  c.innerHTML = list.map(t => `
+    <div class="tuition-card">
+      <div class="tuition-info">
+        <h3>${t.title || 'টিউশন'}</h3>
+        <p>💰 ৳${(t.salary||0).toLocaleString()} | 📍 ${t.location||'-'} | 🗓️ ${t.zone||'-'}</p>
+        <p>📚 ${t.subject||'-'} | 📅 ${t.days||'-'} | ⏰ ${t.time||'-'}</p>
+        <p>🏫 Class: ${t.class||'-'} | Date: ${t.date||'-'}</p>
+        <span class="status-badge status-${t.status||'hidden'}">${t.status === 'available' ? '✅ Available' : t.status === 'booked' ? '🔒 Booked' : '👁️ Hidden'}</span>
+      </div>
+      <div class="tuition-actions">
+        <button class="action-btn btn-make-mod" onclick="setTuitionStatus('${t.id}','available')">✅ Available</button>
+        <button class="action-btn" style="background:rgba(255,170,0,.1);border-color:rgba(255,170,0,.3);color:#fcd34d" onclick="setTuitionStatus('${t.id}','booked')">🔒 Booked</button>
+        <button class="action-btn btn-ban" onclick="setTuitionStatus('${t.id}','hidden')">🙈 Hide</button>
+        <button class="action-btn btn-make-admin" onclick="viewApplicants('${t.id}','${(t.title||'টিউশন').replace(/'/g,"\\'")}')">👥 Applicants</button>
+      </div>
+    </div>`).join('');
+}
+
+async function setTuitionStatus(id, status) {
+  await supabase.from('tuitions').update({ status, visible: status === 'available' }).eq('id', id);
+  showToast('স্ট্যাটাস আপডেট হয়েছে');
+  loadTuitions();
+}
+
+async function addTuition() {
+  const obj = {
+    title: document.getElementById('nt_title').value,
+    salary: parseInt(document.getElementById('nt_salary').value) || 0,
+    subject: document.getElementById('nt_subject').value,
+    location: document.getElementById('nt_location').value,
+    zone: document.getElementById('nt_zone').value,
+    class: document.getElementById('nt_class').value,
+    days: document.getElementById('nt_days').value,
+    time: document.getElementById('nt_time').value,
+    date: document.getElementById('nt_date').value,
+    status: document.getElementById('nt_status').value,
+    visible: document.getElementById('nt_status').value === 'available',
+    description: document.getElementById('nt_desc').value
+  };
+  if (!obj.title || !obj.salary) { showToast('টাইটেল ও স্যালারি দিন'); return; }
+  const { error } = await supabase.from('tuitions').insert(obj);
+  if (error) { showToast('ত্রুটি: ' + error.message); return; }
+  showToast('টিউশন যোগ হয়েছে ✓');
+  ['nt_title','nt_salary','nt_subject','nt_location','nt_class','nt_days','nt_time','nt_date','nt_desc'].forEach(id => document.getElementById(id).value = '');
+  loadTuitions();
+}
+
+// APPLICANTS WITH RANKING
+const TOP_UNIS = ['University of Dhaka','Bangladesh University of Engineering and Technology','Dhaka Medical College','Sir Salimullah Medical College','Shaheed Suhrawardy Medical College','Bangladesh University of Professionals'];
+
+async function loadApplicants() {
+  const { data } = await supabase.from('applications').select(`*, profiles(name, university, whatsapp)`).order('applied_at', { ascending: true });
+  renderApplicants(data || [], '');
+}
+
+async function viewApplicants(tuitionId, title) {
+  switchTab('applicants');
+  document.querySelectorAll('.tab-btn').forEach((t,i) => { if(i===3) t.classList.add('active'); else t.classList.remove('active'); });
+  const { data } = await supabase.from('applications').select(`*, profiles(name, university, whatsapp)`).eq('tuition_id', tuitionId).order('applied_at', { ascending: true });
+  const { data: surveys } = await supabase.from('user_data_survey').select('*');
+  const surveyMap = {};
+  (surveys||[]).forEach(s => surveyMap[s.user_id] = s);
+  const scored = (data||[]).map((app, idx) => {
+    let pts = 0;
+    const uni = app.profiles?.university || '';
+    if (TOP_UNIS.includes(uni)) pts += 2;
+    const sv = surveyMap[app.user_id];
+    if (sv?.paid_media_before) pts += 1;
+    const tc = parseInt(sv?.tuition_count) || 0;
+    if (tc > 2) pts += 1;
+    return { ...app, score: pts, applyOrder: idx };
+  });
+  scored.sort((a, b) => b.score - a.score || a.applyOrder - b.applyOrder);
+  document.getElementById('applicantsList').innerHTML = `<p style="color:#ff99bb;font-weight:700;margin-bottom:12px">📋 "${title}" — আবেদনকারী তালিকা (র‍্যাংক অনুযায়ী)</p>` +
+    scored.map((a, i) => `
+      <div class="applicant-row">
+        <div class="applicant-info">
+          <strong>${a.profiles?.name || '-'}</strong><br/>
+          🎓 ${a.profiles?.university || '-'}<br/>
+          📱 ${a.profiles?.whatsapp || '-'}
+        </div>
+        <span class="rank-badge">#${i+1} | ${a.score} pts</span>
+      </div>`).join('');
+}
+
+function renderApplicants(apps, filter) {
+  if (!apps.length) { document.getElementById('applicantsList').innerHTML = '<p style="color:#999">কোনো আবেদন নেই</p>'; return; }
+  document.getElementById('applicantsList').innerHTML = apps.map(a => `
+    <div class="admin-card">
+      <div class="user-name-admin">${a.tuition_title || 'টিউশন'}</div>
+      <div class="user-meta">👩 ${a.profiles?.name || '-'} | 🎓 ${a.profiles?.university || '-'}</div>
+      <div class="user-meta">📱 ${a.profiles?.whatsapp || '-'} | 💰 ৳${(a.salary||0).toLocaleString()}</div>
+      <div class="user-meta">📅 ${new Date(a.applied_at||'').toLocaleString('bn-BD')}</div>
+    </div>`).join('');
+}
+
+// SOS
+async function loadSOS() {
+  const { data } = await supabase.from('sos_alerts').select('*').order('created_at', { ascending: false });
+  const c = document.getElementById('sosList');
+  if (!data || !data.length) { c.innerHTML = '<p style="color:#999">কোনো SOS নেই</p>'; return; }
+  c.innerHTML = data.map(s => `
+    <div class="admin-card" style="border-color:rgba(255,50,50,.4)">
+      <div style="color:#f87171;font-weight:700;font-size:15px">🆘 ${s.name || '-'}</div>
+      <div class="user-meta">📱 ${s.whatsapp || '-'} | 🎓 ${s.university || '-'}</div>
+      <div class="user-meta">⏰ ${new Date(s.created_at||'').toLocaleString('bn-BD')}</div>
+    </div>`).join('');
+}
+
+// DIRECTORY
+let dirData = [];
+async function loadDirectory() {
+  const { data } = await supabase.from('profiles').select('name,whatsapp,university,email').order('university');
+  dirData = data || [];
+  renderDirectory(dirData);
+}
+function filterDirectory(v) {
+  const f = v.toLowerCase();
+  renderDirectory(dirData.filter(u => (u.university||'').toLowerCase().includes(f) || (u.name||'').toLowerCase().includes(f)));
+}
+function renderDirectory(users) {
+  const c = document.getElementById('dirList');
+  if (!users.length) { c.innerHTML = '<p style="color:#999">কোনো ফলাফল নেই</p>'; return; }
+  let lastUni = '';
+  c.innerHTML = users.map(u => {
+    let header = '';
+    if (u.university !== lastUni) { lastUni = u.university; header = `<div style="color:#ff3369;font-size:13px;font-weight:800;margin:14px 0 8px;padding-bottom:4px;border-bottom:1px solid rgba(255,51,105,.2)">🎓 ${u.university || 'অজানা'}</div>`; }
+    return header + `<div style="display:flex;justify-content:space-between;padding:8px 12px;background:rgba(255,255,255,.03);border-radius:8px;margin-bottom:4px"><span style="font-size:13px;color:#e0e0f0">${u.name||'-'}</span><span style="font-size:13px;color:#ff99bb">${u.whatsapp||'-'}</span></div>`;
+  }).join('');
+}
+
+function showToast(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
+</script>
+</body>
+</html>

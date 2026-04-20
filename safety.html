@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<title>Safety – TuitionMedia</title>
+<link rel="manifest" href="manifest.json"/>
+<meta name="theme-color" content="#e0004e"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial,sans-serif;min-height:100vh;background:linear-gradient(135deg,#fff0f3 0%,#ffe0ea 30%,#ffb3c6 60%,#e0004e 100%);padding-bottom:100px}
+.header{background:rgba(255,255,255,0.88);backdrop-filter:blur(16px);padding:16px 20px;border-bottom:1px solid rgba(224,0,78,0.15);position:sticky;top:0;z-index:100}
+.header h1{font-size:20px;font-weight:900;color:#e0004e}
+.header p{font-size:12px;color:#c4005a;margin-top:2px}
+.content{padding:16px}
+.sos-section{text-align:center;padding:24px 0 16px}
+.sos-btn{width:150px;height:150px;border-radius:50%;background:linear-gradient(135deg,#cc0033,#ff0050,#ff3369);color:#fff;border:none;font-size:18px;font-weight:900;font-family:Arial,sans-serif;cursor:pointer;box-shadow:0 0 0 0 rgba(224,0,78,0.4);animation:sosPulse 2s infinite}
+@keyframes sosPulse{0%{box-shadow:0 0 0 0 rgba(224,0,78,0.5)}70%{box-shadow:0 0 0 24px rgba(224,0,78,0)}100%{box-shadow:0 0 0 0 rgba(224,0,78,0)}}
+.sos-warning{font-size:12px;color:#8b0034;margin-top:12px;line-height:1.6;padding:0 16px}
+.section-title{font-size:16px;font-weight:800;color:#8b0034;margin:20px 0 12px;display:flex;align-items:center;gap:8px}
+.safety-card{background:rgba(255,255,255,0.78);backdrop-filter:blur(12px);border:1.5px solid rgba(224,0,78,0.15);border-radius:16px;padding:16px 18px;margin-bottom:12px;box-shadow:0 4px 16px rgba(224,0,78,0.08)}
+.safety-num{font-size:18px;font-weight:900;color:#e0004e;margin-right:8px}
+.safety-text{font-size:14px;color:#333;line-height:1.7;display:inline}
+.emergency-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+.emg-card{background:rgba(224,0,78,0.06);border:1.5px solid rgba(224,0,78,0.2);border-radius:14px;padding:14px;text-align:center}
+.emg-icon{font-size:28px;margin-bottom:6px}
+.emg-num{font-size:20px;font-weight:900;color:#e0004e}
+.emg-label{font-size:11px;color:#8b0034;font-weight:600}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,0.92);backdrop-filter:blur(16px);border-top:1px solid rgba(224,0,78,0.2);display:flex;justify-content:space-around;padding:10px 0 14px;z-index:500}
+.nav-item{display:flex;flex-direction:column;align-items:center;cursor:pointer;color:#c4005a;font-size:10px;font-weight:600;gap:4px;min-width:60px}
+.nav-item span:first-child{font-size:22px}
+.nav-item.active{color:#e0004e}
+#toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);background:#333;color:#fff;padding:10px 24px;border-radius:24px;font-size:13px;z-index:9999;transition:transform .3s;pointer-events:none}
+#toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>🛡️ Safety</h1>
+  <p>আপনার নিরাপত্তা আমাদের দায়িত্ব</p>
+</div>
+<div id="toast"></div>
+
+<div class="content">
+  <div class="sos-section">
+    <button class="sos-btn" onclick="triggerSOS()">🆘 SOS</button>
+    <div class="sos-warning">
+      আপনি রাস্তাঘাটে সেক্সুয়াল হ্যারাসমেন্টের শিকার হলে এই বাটনে ক্লিক করুন।<br/>
+      আমরা তৎক্ষণিক ব্যবস্থা নেওয়ার চেষ্টা করব।<br/>
+      <strong>তবে অযথা বাটন ক্লিক করলে আপনাকে ব্যান করা হবে।</strong>
+    </div>
+  </div>
+
+  <div class="section-title">🚨 জরুরি নম্বর</div>
+  <div class="emergency-grid">
+    <div class="emg-card"><div class="emg-icon">🚔</div><div class="emg-num">999</div><div class="emg-label">পুলিশ</div></div>
+    <div class="emg-card"><div class="emg-icon">🚑</div><div class="emg-num">199</div><div class="emg-label">অ্যাম্বুলেন্স</div></div>
+    <div class="emg-card"><div class="emg-icon">🔥</div><div class="emg-num">102</div><div class="emg-label">ফায়ার সার্ভিস</div></div>
+    <div class="emg-card"><div class="emg-icon">👮‍♀️</div><div class="emg-num">109</div><div class="emg-label">নারী হেল্পলাইন</div></div>
+  </div>
+
+  <div class="section-title">🚗 যানবাহনে নিরাপত্তা</div>
+  <div class="safety-card"><span class="safety-num">১.</span><span class="safety-text">রাইড শেয়ার করার আগে গাড়ির নম্বর পরিবারকে বা বন্ধুকে পাঠিয়ে দিন।</span></div>
+  <div class="safety-card"><span class="safety-num">২.</span><span class="safety-text">পিছনের সিটে বসুন, সামনের সিটে না। লক বাটন নিজের কাছে রাখুন।</span></div>
+  <div class="safety-card"><span class="safety-num">৩.</span><span class="safety-text">চালক অপরিচিত পথে গেলে সঙ্গে সঙ্গে গাড়ি থামাতে বলুন এবং নেমে যান।</span></div>
+  <div class="safety-card"><span class="safety-num">৪.</span><span class="safety-text">রাত ১০টার পর একা ভ্রমণ এড়িয়ে চলুন। বিশ্বস্ত কোনো মানুষকে সাথে নিন।</span></div>
+
+  <div class="section-title">🚶‍♀️ রাস্তায় হাঁটার সময়</div>
+  <div class="safety-card"><span class="safety-num">৫.</span><span class="safety-text">জনবহুল রাস্তায় হাঁটুন। গলি বা অন্ধকার পথ এড়িয়ে চলুন।</span></div>
+  <div class="safety-card"><span class="safety-num">৬.</span><span class="safety-text">হেডফোন দিয়ে হাঁটবেন না, চারপাশে সতর্ক থাকুন।</span></div>
+  <div class="safety-card"><span class="safety-num">৭.</span><span class="safety-text">কেউ পিছু নিলে, সোজা দোকান বা জনবহুল স্থানে প্রবেশ করুন।</span></div>
+  <div class="safety-card"><span class="safety-num">৮.</span><span class="safety-text">বিপদে পড়লে "আগুন!" বলে জোরে চিৎকার করুন। মানুষ এগিয়ে আসবে।</span></div>
+  <div class="safety-card"><span class="safety-num">৯.</span><span class="safety-text">কেউ উত্ত্যক্ত করলে সাথে সাথে ৯৯৯ বা ১০৯ নম্বরে ফোন করুন।</span></div>
+
+  <div class="section-title">📱 ফোন ও ডিজিটাল নিরাপত্তা</div>
+  <div class="safety-card"><span class="safety-num">১০.</span><span class="safety-text">ফোনে সবসময় ২০% এর বেশি চার্জ রাখুন। পাওয়ার ব্যাংক সাথে রাখার চেষ্টা করুন।</span></div>
+  <div class="safety-card"><span class="safety-num">১১.</span><span class="safety-text">প্রিয়জনের নম্বর মুখস্থ রাখুন। ফোন হারিয়ে গেলেও কাজে আসবে।</span></div>
+  <div class="safety-card"><span class="safety-num">১২.</span><span class="safety-text">অপরিচিত কাউকে ব্যক্তিগত তথ্য, ছবি বা ঠিকানা দেবেন না।</span></div>
+
+  <div class="section-title">🏠 টিউশনে যাওয়ার সময়</div>
+  <div class="safety-card"><span class="safety-num">১৩.</span><span class="safety-text">প্রথমবার কোনো বাড়িতে টিউশন দিতে যাওয়ার আগে ঠিকানা ভালো করে যাচাই করুন।</span></div>
+  <div class="safety-card"><span class="safety-num">১৪.</span><span class="safety-text">পরিবারকে গন্তব্য, সময় এবং ফিরে আসার সময় জানিয়ে যান।</span></div>
+  <div class="safety-card"><span class="safety-num">১৫.</span><span class="safety-text">টিউশনে কোনো অস্বস্তি হলে তাৎক্ষণিকভাবে বের হয়ে যান এবং আমাদের জানান।</span></div>
+</div>
+
+<div class="bottom-nav">
+  <div class="nav-item" onclick="window.location.href='jobs.html'"><span>💼</span><span>Jobs</span></div>
+  <div class="nav-item" onclick="window.location.href='index.html'"><span>🏠</span><span>Home</span></div>
+  <div class="nav-item active"><span>🛡️</span><span>Safety</span></div>
+  <div class="nav-item" onclick="alert('💬 WhatsApp: +8801846156788')"><span>💬</span><span>Talk to Us</span></div>
+</div>
+
+<script>
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+requireAuth();
+
+async function triggerSOS() {
+  const u = getUser();
+  if (!u) return;
+  if (!confirm('আপনি কি সত্যিই বিপদে আছেন?')) return;
+  await sendSOS(u);
+  await supabase.from('sos_alerts').insert({ user_id: u.id, name: u.name, whatsapp: u.whatsapp, university: u.university });
+  const t = document.getElementById('toast');
+  t.textContent = '🆘 আমাদের জানানো হয়েছে! সাহায্য আসছে।';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 4000);
+}
+</script>
+</body>
+</html>
